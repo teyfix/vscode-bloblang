@@ -2,6 +2,8 @@
 
 [Bloblang](https://docs.redpanda.com/redpanda-connect/guides/bloblang/about/) language support for Visual Studio Code, powered by [bloblang-lsp](https://github.com/teyfix/bloblang-lsp).
 
+![Example usage](docs/example.gif)
+
 ## Features
 
 - **Intelligent Code Completion** — Auto-complete Bloblang functions and methods with contextual awareness

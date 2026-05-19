@@ -1,7 +1,8 @@
 {
   "name": "vscode-bloblang",
-  "version": "0.0.2",
-  "description": "Bloblang LSP",
+  "displayName": "Bloblang",
+  "version": "0.0.3",
+  "description": "Bloblang language support for VS Code",
   "categories": [
     "Programming Languages",
     "Linters",
@@ -42,7 +43,7 @@
     "@biomejs/biome": "^2.4.15",
     "@types/bun": "latest",
     "@types/unzipper": "^0.10.11",
-    "@types/vscode": "1.90",
+    "@types/vscode": "^1.90.0",
     "@vscode/vsce": "^3.9.1",
     "prettier": "^3.8.3",
     "prettier-plugin-packagejson": "^3.0.2",
@@ -50,10 +51,10 @@
     "tar": "^7.5.15",
     "typescript": "^5",
     "unzipper": "^0.12.3",
-    "vscode": "^1.1.37",
     "vscode-languageclient": "^9.0.1"
   },
   "engines": {
     "vscode": "^1.90.0"
-  }
+  },
+  "icon": "icon.png"
 }

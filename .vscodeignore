@@ -1,5 +1,7 @@
 **
 !dist/extension.js
+!docs/example.gif
+!icon.png
 !LICENSE
 !package.json
 !README.md
