@@ -124,6 +124,7 @@ function getOsType(): string {
 
   switch (name) {
     case 'win32':
+    case 'windows_nt':
       return 'windows';
     default:
       return name;
