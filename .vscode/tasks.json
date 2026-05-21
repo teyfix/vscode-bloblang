@@ -1,26 +1,24 @@
 {
   "tasks": [
     {
-      "command": "bun run bundle",
-      "group": {
-        "isDefault": true,
-        "kind": "build"
-      },
-      "label": "bundle",
-      "presentation": {
-        "panel": "dedicated",
-        "reveal": "silent"
-      },
-      "type": "shell"
-    },
-    {
-      "command": "bun run bundle:watch",
+      "command": "bun run build:watch",
       "group": "build",
       "isBackground": true,
-      "label": "bundle:watch",
+      "label": "build:watch",
       "presentation": {
         "panel": "dedicated",
         "reveal": "silent"
+      },
+      "problemMatcher": {
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "bun run build",
+          "endsPattern": "Bundled"
+        },
+        "owner": "bun",
+        "pattern": {
+          "regexp": "^$"
+        }
       },
       "type": "shell"
     }

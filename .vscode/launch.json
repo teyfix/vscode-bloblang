@@ -5,7 +5,7 @@
       "autoAttachChildProcesses": true,
       "name": "Launch Extension",
       "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "preLaunchTask": "bundle",
+      "preLaunchTask": "build:watch",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "type": "extensionHost"
