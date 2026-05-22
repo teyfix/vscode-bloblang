@@ -1,7 +1,7 @@
 {
   "name": "vscode-bloblang",
   "displayName": "Bloblang",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Bloblang language support for VS Code",
   "categories": [
     "Programming Languages",
@@ -25,7 +25,9 @@
   "scripts": {
     "build": "bun build src/index.ts --outfile dist/extension.js --format cjs --target node --external vscode --external @aws-sdk/client-s3",
     "build:min": "bun run build -- --minify",
-    "build:watch": "bun run build -- --watch"
+    "build:watch": "bun run build -- --watch",
+    "prepackage": "bun run build:min",
+    "package": "vsce package"
   },
   "contributes": {
     "commands": [
