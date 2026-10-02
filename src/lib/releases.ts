@@ -4,7 +4,7 @@ import {
   existsSync,
   type PathLike,
 } from 'node:fs';
-import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { access, chmod, mkdir, readFile, writeFile } from 'node:fs/promises';
 import * as os from 'node:os';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
@@ -197,6 +197,7 @@ export async function downloadAsset({
   const [hasBin] = await exists(binPath);
 
   if (hasBin) {
+    if (process.platform !== 'win32') await chmod(binPath, 0o755);
     await access(
       binPath,
       process.platform === 'win32' ? constants.F_OK : constants.X_OK,
@@ -248,6 +249,7 @@ export async function downloadAsset({
   }
 
   if (hasDownloadedBin) {
+    if (process.platform !== 'win32') await chmod(binPath, 0o755);
     await access(
       binPath,
       process.platform === 'win32' ? constants.F_OK : constants.X_OK,
