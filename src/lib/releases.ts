@@ -5,6 +5,7 @@ import {
   type PathLike,
 } from 'node:fs';
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
+import * as os from 'node:os';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { createGunzip } from 'node:zlib';
@@ -131,20 +132,23 @@ export async function getReleases({ context }: { context: ExtensionContext }) {
 }
 
 function getOsType(): string {
-  switch (process.platform) {
+  const name = os.type().toLowerCase();
+  switch (name) {
     case 'win32':
+    case 'windows_nt':
       return 'windows';
     default:
-      return process.platform;
+      return name;
   }
 }
 
 function getOsArch(): string {
-  switch (process.arch) {
+  const arch = os.arch().toLowerCase();
+  switch (arch) {
     case 'x64':
       return 'amd64';
     default:
-      return process.arch;
+      return arch;
   }
 }
 
