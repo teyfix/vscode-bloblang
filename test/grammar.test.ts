@@ -273,12 +273,84 @@ test('next-line quoted sequence values and escaped host quotes return to YAML', 
     ).toBe(false);
 });
 
+test('nested output_batches Bloblang expression highlights across a quoted YAML scalar', async () => {
+  const grammar = await registry.loadGrammar('source.yaml');
+  if (!grammar) throw new Error('Missing YAML grammar');
+  const tokens = tokenize(
+    grammar,
+    `tests:
+  - output_batches:
+      - - bloblang:
+            'this.deduplicated_count == 3 &&
+            this.releases.index(0).provider_observations.length() == 2 &&
+            this.releases.index(2).source_release_id == "btih:av1"'
+  - name: ordinary_yaml`,
+  );
+  for (const line of [3, 4, 5])
+    expect(
+      hasToken(tokens[line] ?? [], 'this', 'variable.language.bloblang'),
+    ).toBe(true);
+  expect(
+    hasToken(tokens[4] ?? [], 'index', 'support.function.method.bloblang'),
+  ).toBe(true);
+  expect(
+    tokens[6]?.some((token) =>
+      token.scopes.includes('meta.embedded.inline.bloblang'),
+    ),
+  ).toBe(false);
+});
+
+test('nested output_batches plain and inline quoted expressions highlight', async () => {
+  const grammar = await registry.loadGrammar('source.yaml');
+  if (!grammar) throw new Error('Missing YAML grammar');
+  const tokens = tokenize(
+    grammar,
+    `tests:
+  - output_batches:
+      - - bloblang:
+            this.matched && this.release.quality == 480 && !this.dispatchable &&
+            this.source_release_id == null
+  - output_batches:
+      - - bloblang: "!this.matched && !this.dispatchable"
+  - output_batches:
+      - - mapping:
+            this.default_video.quality == 1080 && this.videos.length() == 3 &&
+            this.videos.index(1).quality == 480
+  - name: ordinary_yaml`,
+  );
+  expect(
+    [3, 4, 6, 9, 10].filter(
+      (line) =>
+        !hasToken(tokens[line] ?? [], 'this', 'variable.language.bloblang'),
+    ),
+  ).toEqual([]);
+  expect(
+    tokens[11]?.some((token) =>
+      token.scopes.includes('meta.embedded.inline.bloblang'),
+    ),
+  ).toBe(false);
+});
+
 test('empty YAML sequence mapping key does not capture a quoted sibling key', async () => {
   const grammar = await registry.loadGrammar('source.yaml');
   if (!grammar) throw new Error('Missing YAML grammar');
   const tokens = tokenize(
     grammar,
     'processors:\n  - mapping:\n    "label": "root = this"\n  - label: unchanged',
+  );
+  expect(
+    tokens[2]?.some((token) =>
+      token.scopes.includes('meta.embedded.inline.bloblang'),
+    ),
+  ).toBe(false);
+});
+
+test('key-only mapping with a nested YAML key remains YAML', async () => {
+  const grammar = await registry.loadGrammar('source.yaml');
+  if (!grammar) throw new Error('Missing YAML grammar');
+  const tokens = tokenize(
+    grammar,
+    'processors:\n  - mapping:\n      label: ordinary_yaml\n  - label: unchanged',
   );
   expect(
     tokens[2]?.some((token) =>

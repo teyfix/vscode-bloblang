@@ -109,7 +109,7 @@ const bloblang = {
 };
 const keys =
   '(?:mapping|request_map|result_map|args_mapping|fields_mapping|check|bloblang)';
-const keyPrefix = `(?<=^([ \t]*)(?:-[ \t]+)?)((?:["']?${keys}["']?))[ \t]*(:)[ \t]*`;
+const keyPrefix = `(?<=^([ \t]*)(?:-[ \t]+)*)((?:["']?${keys}["']?))[ \t]*(:)[ \t]*`;
 const keyCaptures = {
   2: { name: 'entity.name.tag.yaml' },
   3: { name: 'punctuation.separator.key-value.yaml' },
@@ -217,16 +217,23 @@ const yaml = {
       ],
     },
     {
-      // Hold the key until an indented quoted scalar starts. Lookbehinds let
-      // this cooperate with indentation already consumed by the host grammar.
-      // Other values or a sibling key immediately return to YAML.
+      // Hold a key-only scalar while its indented value begins on a later line.
+      // Lookbehinds cooperate with indentation consumed by the host grammar.
+      // Dedentation or a nested YAML collection returns control to the host.
       begin: `${keyPrefix}(?:#.*)?$`,
-      end: `(?<=^[ \\t]*)(?=\\S)(?<!^\\1[ \\t]+)|(?<=^[ \\t]*)(?=[^"'#\\s])|(?<=["'])(?=[ \\t]*(?:#|$))`,
+      end: `(?<=^[ \\t]*)(?=\\S)(?<!^\\1[ \\t]+)|(?<=^[ \\t]*)(?=(?:-[ \\t]+|[A-Za-z_][A-Za-z0-9_-]*[ \\t]*:))`,
       beginCaptures: keyCaptures,
       patterns: [
         { match: '(?<=^[ \\t]*)#.*$', name: 'comment.line.number-sign.yaml' },
         { ...yamlSingleQuote, begin: `(?<=^[ \\t]+)(')` },
         { ...yamlDoubleQuote, begin: `(?<=^[ \\t]+)(")` },
+        {
+          // A plain YAML scalar can span lines below the key.
+          begin: `(?<=^[ \\t]+)(?=[^"\\x27#\\s])`,
+          end: '$',
+          contentName: 'meta.embedded.inline.bloblang',
+          patterns: [include('source.bloblang.teyfix')],
+        },
       ],
     },
     {

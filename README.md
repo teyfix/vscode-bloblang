@@ -12,8 +12,10 @@ extension.
 Open a `.blobl` or `.bloblang` file. Bloblang is also highlighted inside YAML
 `mapping`, `request_map`, `result_map`, `args_mapping`, `fields_mapping`, `check`,
 and test `bloblang` values, including literal/folded blocks and quoted/plain
-scalars. Quoted scalar values may begin on the line after the mapping key and
-span multiple lines. `${! ... }` interpolation is highlighted in YAML strings.
+scalars. The test `bloblang` key is a legacy alias for `mapping`; prefer `mapping`
+in new files. Values can start on the line after the key and span multiple lines,
+including nested `output_batches` expressions. `${! ... }` interpolation is
+highlighted in YAML strings.
 In valid YAML documents, embedded Bloblang receives server diagnostics, hover,
 completion and navigation with positions mapped to the original document. Mapping
 values also receive formatting; interpolation expressions are not formatted.

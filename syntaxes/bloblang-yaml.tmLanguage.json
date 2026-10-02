@@ -21,7 +21,7 @@
       ]
     },
     {
-      "begin": "(?<=^([ \t]*)(?:-[ \t]+)?)((?:[\"']?(?:mapping|request_map|result_map|args_mapping|fields_mapping|check|bloblang)[\"']?))[ \t]*(:)[ \t]*([|>][+-]?[1-9]?|[|>][1-9][+-]?)[ \\t]*(?:#.*)?$",
+      "begin": "(?<=^([ \t]*)(?:-[ \t]+)*)((?:[\"']?(?:mapping|request_map|result_map|args_mapping|fields_mapping|check|bloblang)[\"']?))[ \t]*(:)[ \t]*([|>][+-]?[1-9]?|[|>][1-9][+-]?)[ \\t]*(?:#.*)?$",
       "end": "(?<=^[ \\t]*)(?<!^\\1[ \\t]+)(?=\\S)",
       "contentName": "meta.embedded.block.bloblang",
       "beginCaptures": {
@@ -42,7 +42,7 @@
       ]
     },
     {
-      "begin": "(?<=^([ \t]*)(?:-[ \t]+)?)((?:[\"']?(?:mapping|request_map|result_map|args_mapping|fields_mapping|check|bloblang)[\"']?))[ \t]*(:)[ \t]*(')",
+      "begin": "(?<=^([ \t]*)(?:-[ \t]+)*)((?:[\"']?(?:mapping|request_map|result_map|args_mapping|fields_mapping|check|bloblang)[\"']?))[ \t]*(:)[ \t]*(')",
       "end": "'(?!')",
       "contentName": "meta.embedded.inline.bloblang",
       "beginCaptures": {
@@ -72,7 +72,7 @@
       ]
     },
     {
-      "begin": "(?<=^([ \t]*)(?:-[ \t]+)?)((?:[\"']?(?:mapping|request_map|result_map|args_mapping|fields_mapping|check|bloblang)[\"']?))[ \t]*(:)[ \t]*(\")",
+      "begin": "(?<=^([ \t]*)(?:-[ \t]+)*)((?:[\"']?(?:mapping|request_map|result_map|args_mapping|fields_mapping|check|bloblang)[\"']?))[ \t]*(:)[ \t]*(\")",
       "end": "\"",
       "contentName": "meta.embedded.inline.bloblang",
       "beginCaptures": {
@@ -190,8 +190,8 @@
       ]
     },
     {
-      "begin": "(?<=^([ \t]*)(?:-[ \t]+)?)((?:[\"']?(?:mapping|request_map|result_map|args_mapping|fields_mapping|check|bloblang)[\"']?))[ \t]*(:)[ \t]*(?:#.*)?$",
-      "end": "(?<=^[ \\t]*)(?=\\S)(?<!^\\1[ \\t]+)|(?<=^[ \\t]*)(?=[^\"'#\\s])|(?<=[\"'])(?=[ \\t]*(?:#|$))",
+      "begin": "(?<=^([ \t]*)(?:-[ \t]+)*)((?:[\"']?(?:mapping|request_map|result_map|args_mapping|fields_mapping|check|bloblang)[\"']?))[ \t]*(:)[ \t]*(?:#.*)?$",
+      "end": "(?<=^[ \\t]*)(?=\\S)(?<!^\\1[ \\t]+)|(?<=^[ \\t]*)(?=(?:-[ \\t]+|[A-Za-z_][A-Za-z0-9_-]*[ \\t]*:))",
       "beginCaptures": {
         "2": {
           "name": "entity.name.tag.yaml"
@@ -263,11 +263,21 @@
               "include": "source.bloblang.teyfix"
             }
           ]
+        },
+        {
+          "begin": "(?<=^[ \\t]+)(?=[^\"\\x27#\\s])",
+          "end": "$",
+          "contentName": "meta.embedded.inline.bloblang",
+          "patterns": [
+            {
+              "include": "source.bloblang.teyfix"
+            }
+          ]
         }
       ]
     },
     {
-      "begin": "(?<=^([ \t]*)(?:-[ \t]+)?)((?:[\"']?(?:mapping|request_map|result_map|args_mapping|fields_mapping|check|bloblang)[\"']?))[ \t]*(:)[ \t]*(?=\\S)(?![|>\"'#{\\[]|(?:true|false|null)[ \\t]*(?:#.*)?$)",
+      "begin": "(?<=^([ \t]*)(?:-[ \t]+)*)((?:[\"']?(?:mapping|request_map|result_map|args_mapping|fields_mapping|check|bloblang)[\"']?))[ \t]*(:)[ \t]*(?=\\S)(?![|>\"'#{\\[]|(?:true|false|null)[ \\t]*(?:#.*)?$)",
       "end": "$",
       "contentName": "meta.embedded.inline.bloblang",
       "beginCaptures": {
