@@ -204,6 +204,22 @@ const yaml = {
       },
     },
     {
+      begin: `(?<=^([ \t]*)-([ \t]+))((?:["']?${keys}["']?))[ \t]*(:)[ \t]*(?:#.*)?$`,
+      end: `(?<=^[ \\t]*)(?=\\S)(?<!^\\1[ \\t]\\2[ \\t]+)|(?<=^[ \\t]*)(?=[^"'#\\s])|(?<=["'])(?=[ \\t]*(?:#|$))`,
+      beginCaptures: {
+        3: { name: 'entity.name.tag.yaml' },
+        4: { name: 'punctuation.separator.key-value.yaml' },
+      },
+      patterns: [
+        { match: '(?<=^[ \\t]*)#.*$', name: 'comment.line.number-sign.yaml' },
+        { ...yamlSingleQuote, begin: `(?<=^[ \\t]+)(')` },
+        { ...yamlDoubleQuote, begin: `(?<=^[ \\t]+)(")` },
+      ],
+    },
+    {
+      // Hold the key until an indented quoted scalar starts. Lookbehinds let
+      // this cooperate with indentation already consumed by the host grammar.
+      // Other values or a sibling key immediately return to YAML.
       begin: `${keyPrefix}(?:#.*)?$`,
       end: `(?<=^[ \\t]*)(?=\\S)(?<!^\\1[ \\t]+)|(?<=^[ \\t]*)(?=[^"'#\\s])|(?<=["'])(?=[ \\t]*(?:#|$))`,
       beginCaptures: keyCaptures,

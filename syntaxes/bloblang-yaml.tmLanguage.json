@@ -113,6 +113,83 @@
       ]
     },
     {
+      "begin": "(?<=^([ \t]*)-([ \t]+))((?:[\"']?(?:mapping|request_map|result_map|args_mapping|fields_mapping|check|bloblang)[\"']?))[ \t]*(:)[ \t]*(?:#.*)?$",
+      "end": "(?<=^[ \\t]*)(?=\\S)(?<!^\\1[ \\t]\\2[ \\t]+)|(?<=^[ \\t]*)(?=[^\"'#\\s])|(?<=[\"'])(?=[ \\t]*(?:#|$))",
+      "beginCaptures": {
+        "3": {
+          "name": "entity.name.tag.yaml"
+        },
+        "4": {
+          "name": "punctuation.separator.key-value.yaml"
+        }
+      },
+      "patterns": [
+        {
+          "match": "(?<=^[ \\t]*)#.*$",
+          "name": "comment.line.number-sign.yaml"
+        },
+        {
+          "begin": "(?<=^[ \\t]+)(')",
+          "end": "'(?!')",
+          "contentName": "meta.embedded.inline.bloblang",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.string.begin.yaml"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.end.yaml"
+            }
+          },
+          "patterns": [
+            {
+              "match": "''",
+              "name": "constant.character.escape.yaml"
+            },
+            {
+              "include": "source.bloblang.teyfix"
+            }
+          ]
+        },
+        {
+          "begin": "(?<=^[ \\t]+)(\")",
+          "end": "\"",
+          "contentName": "meta.embedded.inline.bloblang",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.string.begin.yaml"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.end.yaml"
+            }
+          },
+          "patterns": [
+            {
+              "begin": "\\\\\"",
+              "end": "\\\\\"",
+              "name": "string.quoted.double.bloblang",
+              "patterns": [
+                {
+                  "match": "\\\\\\\\.",
+                  "name": "constant.character.escape.bloblang"
+                }
+              ]
+            },
+            {
+              "match": "\\\\.",
+              "name": "constant.character.escape.yaml"
+            },
+            {
+              "include": "source.bloblang.teyfix"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "begin": "(?<=^([ \t]*)(?:-[ \t]+)?)((?:[\"']?(?:mapping|request_map|result_map|args_mapping|fields_mapping|check|bloblang)[\"']?))[ \t]*(:)[ \t]*(?:#.*)?$",
       "end": "(?<=^[ \\t]*)(?=\\S)(?<!^\\1[ \\t]+)|(?<=^[ \\t]*)(?=[^\"'#\\s])|(?<=[\"'])(?=[ \\t]*(?:#|$))",
       "beginCaptures": {

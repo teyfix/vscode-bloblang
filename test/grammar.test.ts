@@ -272,3 +272,17 @@ test('next-line quoted sequence values and escaped host quotes return to YAML', 
       ),
     ).toBe(false);
 });
+
+test('empty YAML sequence mapping key does not capture a quoted sibling key', async () => {
+  const grammar = await registry.loadGrammar('source.yaml');
+  if (!grammar) throw new Error('Missing YAML grammar');
+  const tokens = tokenize(
+    grammar,
+    'processors:\n  - mapping:\n    "label": "root = this"\n  - label: unchanged',
+  );
+  expect(
+    tokens[2]?.some((token) =>
+      token.scopes.includes('meta.embedded.inline.bloblang'),
+    ),
+  ).toBe(false);
+});
