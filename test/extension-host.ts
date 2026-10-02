@@ -197,7 +197,7 @@ export async function run(): Promise<void> {
   assert.ok(registered.includes('bloblang.formatEmbeddedMappings'));
   await vscode.commands.executeCommand('bloblang.restartServer');
   console.log(
-    'Bloblang extension smoke passed: offline bundled startup, registration, static/sample/declaration/deletion hover, completion, formatting, YAML mapping and next-line expressions, diagnostics, untitled, restart',
+    'Bloblang extension smoke passed: downloaded server startup, registration, static/sample/declaration/deletion hover, completion, formatting, YAML mapping and next-line expressions, diagnostics, untitled, restart',
   );
   await writeFile(path.join(folder, 'passed.txt'), 'passed\n');
 }
