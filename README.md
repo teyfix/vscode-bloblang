@@ -119,7 +119,7 @@ The other rules provide suggestions to review. `.with()` omits missing fields,
 where object construction retains `null`; `.assign()` merges nested objects,
 where direct field assignments replace them; `.any()` short-circuits, which can
 change predicate errors or side effects. Formatting does not apply lint refactors.
-See the server's [lint guide](https://github.com/teyfix/bloblang-lsp/blob/main/docs/features/lint.md)
+See the server's [lint guide](https://github.com/teyfix/bloblang-lsp/blob/7b72549726b37a784405b72aabcb93f4ab7455c4/docs/features/lint.md)
 for the rule conditions and examples.
 
 ## Sample input and metadata
