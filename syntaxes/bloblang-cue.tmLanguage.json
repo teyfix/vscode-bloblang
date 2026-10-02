@@ -1,0 +1,94 @@
+{
+  "scopeName": "bloblang.injection.cue",
+  "injectionSelector": "L:source.cue -comment -meta.embedded.block.bloblang -meta.embedded.inline.bloblang",
+  "patterns": [
+    {
+      "begin": "(?<![\\w])((?:mapping|request_map|result_map|args_mapping|fields_mapping|check|bloblang))[ \\t]*(:)[ \\t]*(#{0,})(\"\"\")",
+      "end": "\"\"\"\\3",
+      "contentName": "meta.embedded.block.bloblang",
+      "beginCaptures": {
+        "1": {
+          "name": "variable.other.property.cue"
+        },
+        "2": {
+          "name": "punctuation.separator.key-value.cue"
+        }
+      },
+      "patterns": [
+        {
+          "include": "source.bloblang.teyfix"
+        }
+      ]
+    },
+    {
+      "begin": "(?<![\\w])((?:mapping|request_map|result_map|args_mapping|fields_mapping|check|bloblang))[ \\t]*(:)[ \\t]*(#+)(\")",
+      "end": "\"\\3",
+      "contentName": "meta.embedded.inline.bloblang",
+      "beginCaptures": {
+        "1": {
+          "name": "variable.other.property.cue"
+        },
+        "2": {
+          "name": "punctuation.separator.key-value.cue"
+        }
+      },
+      "patterns": [
+        {
+          "include": "source.bloblang.teyfix"
+        }
+      ]
+    },
+    {
+      "begin": "(?<![\\w])((?:mapping|request_map|result_map|args_mapping|fields_mapping|check|bloblang))[ \\t]*(:)[ \\t]*(\")",
+      "end": "\"",
+      "contentName": "meta.embedded.inline.bloblang",
+      "patterns": [
+        {
+          "match": "\\\\.",
+          "name": "constant.character.escape.cue"
+        },
+        {
+          "include": "source.bloblang.teyfix"
+        }
+      ]
+    },
+    {
+      "begin": "\\$\\{!",
+      "end": "\\}",
+      "contentName": "meta.embedded.inline.bloblang",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.section.interpolation.begin.bloblang"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.interpolation.end.bloblang"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#interpolation-content"
+        }
+      ]
+    }
+  ],
+  "repository": {
+    "interpolation-content": {
+      "patterns": [
+        {
+          "begin": "\\{",
+          "end": "\\}",
+          "patterns": [
+            {
+              "include": "#interpolation-content"
+            }
+          ]
+        },
+        {
+          "include": "source.bloblang.teyfix"
+        }
+      ]
+    }
+  }
+}

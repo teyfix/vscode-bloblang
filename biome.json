@@ -7,7 +7,10 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!.history"]
+    "includes": [
+      "**",
+      "!.history"
+    ]
   },
   "formatter": {
     "enabled": true,
@@ -22,6 +25,9 @@
           "fix": "safe",
           "level": "error"
         }
+      },
+      "suspicious": {
+        "noTemplateCurlyInString": "off"
       }
     }
   },

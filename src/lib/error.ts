@@ -1,3 +1,5 @@
+import util from 'node:util';
+
 export abstract class BloblangError extends Error {
   abstract override readonly name: string;
   readonly reason: unknown;
@@ -10,5 +12,9 @@ export abstract class BloblangError extends Error {
     } else {
       this.reason = reason;
     }
+  }
+
+  toJSON(): string {
+    return util.inspect(this, { colors: false, compact: true, depth: 3 });
   }
 }

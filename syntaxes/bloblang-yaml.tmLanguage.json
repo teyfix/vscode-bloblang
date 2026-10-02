@@ -1,0 +1,172 @@
+{
+  "scopeName": "bloblang.injection.yaml",
+  "injectionSelector": "L:source.yaml -comment -meta.embedded.block.bloblang -meta.embedded.inline.bloblang, L:source.yaml.1.2 -comment -meta.embedded.block.bloblang -meta.embedded.inline.bloblang",
+  "patterns": [
+    {
+      "begin": "(?<=^([ \t]*)-([ \t]+))((?:[\"']?(?:mapping|request_map|result_map|args_mapping|fields_mapping|check|bloblang)[\"']?))[ \t]*(:)[ \t]*([|>][+-]?[1-9]?|[|>][1-9][+-]?)[ \t]*(?:#.*)?$",
+      "end": "(?<=^[ \t]*)(?<!^\\1[ \t]\\2[ \t]+)(?=\\S)",
+      "contentName": "meta.embedded.block.bloblang",
+      "beginCaptures": {
+        "3": {
+          "name": "entity.name.tag.yaml"
+        },
+        "4": {
+          "name": "punctuation.separator.key-value.yaml"
+        }
+      },
+      "patterns": [
+        {
+          "include": "source.bloblang.teyfix"
+        }
+      ]
+    },
+    {
+      "begin": "(?<=^([ \t]*)(?:-[ \t]+)?)((?:[\"']?(?:mapping|request_map|result_map|args_mapping|fields_mapping|check|bloblang)[\"']?))[ \t]*(:)[ \t]*([|>][+-]?[1-9]?|[|>][1-9][+-]?)[ \\t]*(?:#.*)?$",
+      "end": "(?<=^[ \\t]*)(?<!^\\1[ \\t]+)(?=\\S)",
+      "contentName": "meta.embedded.block.bloblang",
+      "beginCaptures": {
+        "2": {
+          "name": "entity.name.tag.yaml"
+        },
+        "3": {
+          "name": "punctuation.separator.key-value.yaml"
+        },
+        "4": {
+          "name": "punctuation.definition.block.scalar.yaml"
+        }
+      },
+      "patterns": [
+        {
+          "include": "source.bloblang.teyfix"
+        }
+      ]
+    },
+    {
+      "begin": "(?<=^([ \t]*)(?:-[ \t]+)?)((?:[\"']?(?:mapping|request_map|result_map|args_mapping|fields_mapping|check|bloblang)[\"']?))[ \t]*(:)[ \t]*(')",
+      "end": "'(?!')",
+      "contentName": "meta.embedded.inline.bloblang",
+      "beginCaptures": {
+        "2": {
+          "name": "entity.name.tag.yaml"
+        },
+        "3": {
+          "name": "punctuation.separator.key-value.yaml"
+        },
+        "4": {
+          "name": "punctuation.definition.string.begin.yaml"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.end.yaml"
+        }
+      },
+      "patterns": [
+        {
+          "match": "''",
+          "name": "constant.character.escape.yaml"
+        },
+        {
+          "include": "source.bloblang.teyfix"
+        }
+      ]
+    },
+    {
+      "begin": "(?<=^([ \t]*)(?:-[ \t]+)?)((?:[\"']?(?:mapping|request_map|result_map|args_mapping|fields_mapping|check|bloblang)[\"']?))[ \t]*(:)[ \t]*(\")",
+      "end": "\"",
+      "contentName": "meta.embedded.inline.bloblang",
+      "beginCaptures": {
+        "2": {
+          "name": "entity.name.tag.yaml"
+        },
+        "3": {
+          "name": "punctuation.separator.key-value.yaml"
+        },
+        "4": {
+          "name": "punctuation.definition.string.begin.yaml"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.end.yaml"
+        }
+      },
+      "patterns": [
+        {
+          "begin": "\\\\\"",
+          "end": "\\\\\"",
+          "name": "string.quoted.double.bloblang",
+          "patterns": [
+            {
+              "match": "\\\\\\\\.",
+              "name": "constant.character.escape.bloblang"
+            }
+          ]
+        },
+        {
+          "match": "\\\\.",
+          "name": "constant.character.escape.yaml"
+        },
+        {
+          "include": "source.bloblang.teyfix"
+        }
+      ]
+    },
+    {
+      "begin": "(?<=^([ \t]*)(?:-[ \t]+)?)((?:[\"']?(?:mapping|request_map|result_map|args_mapping|fields_mapping|check|bloblang)[\"']?))[ \t]*(:)[ \t]*(?=\\S)(?![|>\"'#{\\[]|(?:true|false|null)[ \\t]*(?:#.*)?$)",
+      "end": "$",
+      "contentName": "meta.embedded.inline.bloblang",
+      "beginCaptures": {
+        "2": {
+          "name": "entity.name.tag.yaml"
+        },
+        "3": {
+          "name": "punctuation.separator.key-value.yaml"
+        }
+      },
+      "patterns": [
+        {
+          "include": "source.bloblang.teyfix"
+        }
+      ]
+    },
+    {
+      "begin": "\\$\\{!",
+      "end": "\\}",
+      "contentName": "meta.embedded.inline.bloblang",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.section.interpolation.begin.bloblang"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.interpolation.end.bloblang"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#interpolation-content"
+        }
+      ]
+    }
+  ],
+  "repository": {
+    "interpolation-content": {
+      "patterns": [
+        {
+          "begin": "\\{",
+          "end": "\\}",
+          "patterns": [
+            {
+              "include": "#interpolation-content"
+            }
+          ]
+        },
+        {
+          "include": "source.bloblang.teyfix"
+        }
+      ]
+    }
+  }
+}

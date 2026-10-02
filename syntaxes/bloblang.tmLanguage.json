@@ -1,0 +1,159 @@
+{
+  "name": "Bloblang",
+  "scopeName": "source.bloblang.teyfix",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "match": "\\b(map)(\\s+)([A-Za-z_][A-Za-z0-9_]*)",
+      "captures": {
+        "1": {
+          "name": "keyword.declaration.bloblang"
+        },
+        "3": {
+          "name": "entity.name.function.bloblang"
+        }
+      }
+    },
+    {
+      "match": "\\b(let)(\\s+)([A-Za-z_][A-Za-z0-9_]*)",
+      "captures": {
+        "1": {
+          "name": "keyword.declaration.bloblang"
+        },
+        "3": {
+          "name": "variable.other.bloblang"
+        }
+      }
+    },
+    {
+      "match": "\\b(this|root)\\b",
+      "name": "variable.language.bloblang"
+    },
+    {
+      "match": "\\b(map|let|meta|import|from|if|else|match)\\b",
+      "name": "keyword.control.bloblang"
+    },
+    {
+      "match": "\\b(true|false|null)\\b",
+      "name": "constant.language.bloblang"
+    },
+    {
+      "match": "(?<![\\w.])-?\\b(?:0[xX][0-9a-fA-F]+|[0-9]+(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?)\\b",
+      "name": "constant.numeric.bloblang"
+    },
+    {
+      "match": "[$@][A-Za-z_][A-Za-z0-9_]*|@",
+      "name": "variable.other.bloblang"
+    },
+    {
+      "match": "(\\.)([A-Za-z_][A-Za-z0-9_]*)(?=\\s*\\()",
+      "captures": {
+        "1": {
+          "name": "punctuation.accessor.bloblang"
+        },
+        "2": {
+          "name": "support.function.method.bloblang"
+        }
+      }
+    },
+    {
+      "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()",
+      "name": "support.function.bloblang"
+    },
+    {
+      "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*->)",
+      "name": "variable.parameter.bloblang"
+    },
+    {
+      "match": "(\\.)([A-Za-z_][A-Za-z0-9_]*)",
+      "captures": {
+        "1": {
+          "name": "punctuation.accessor.bloblang"
+        },
+        "2": {
+          "name": "variable.other.property.bloblang"
+        }
+      }
+    },
+    {
+      "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*:)",
+      "name": "variable.other.property.bloblang"
+    },
+    {
+      "match": "=>|->|==|!=|>=|<=|&&|\\|\\||[-+*/%=!<>|]",
+      "name": "keyword.operator.bloblang"
+    },
+    {
+      "include": "#braces"
+    },
+    {
+      "match": "[\\[\\]()]",
+      "name": "punctuation.section.brackets.bloblang"
+    },
+    {
+      "match": "[.,:;]",
+      "name": "punctuation.separator.bloblang"
+    },
+    {
+      "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b",
+      "name": "variable.other.bloblang"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "begin": "#!([A-Za-z_][A-Za-z0-9_]*)",
+          "end": "$",
+          "name": "comment.line.directive.bloblang",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.other.directive.bloblang"
+            }
+          }
+        },
+        {
+          "match": "#.*$",
+          "name": "comment.line.number-sign.bloblang"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "begin": "\"\"\"",
+          "end": "\"\"\"",
+          "name": "string.quoted.triple.bloblang",
+          "patterns": [
+            {
+              "include": "#escapes"
+            }
+          ]
+        },
+        {
+          "begin": "\"",
+          "end": "\"|$",
+          "name": "string.quoted.double.bloblang",
+          "patterns": [
+            {
+              "include": "#escapes"
+            }
+          ]
+        }
+      ]
+    },
+    "escapes": {
+      "match": "\\\\(?:[\"\\\\/bfnrt]|u[0-9a-fA-F]{4})",
+      "name": "constant.character.escape.bloblang"
+    },
+    "braces": {
+      "match": "[{}]",
+      "name": "punctuation.section.braces.bloblang"
+    }
+  }
+}

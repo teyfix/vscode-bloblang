@@ -1,0 +1,19 @@
+pipeline:
+  processors:
+    - mapping: |-
+        root = this
+        root.name = this.name.uppercase()
+      label: ordinary_yaml
+    - request_map: >-
+        root = this
+      result_map: 'root.result = this.result'
+    - args_mapping: "root = [this.id, meta(\"topic\")]"
+    - fields_mapping: root = this
+    - check: this.ok == true
+    - bloblang: |
+        root = this.value
+output:
+  topic: '${! meta("topic") }'
+  key: '${! {"id": this.id}.format_json() }'
+ordinary: 'root = this is just text'
+last: true

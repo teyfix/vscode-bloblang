@@ -1,7 +1,12 @@
 **
 !dist/extension.js
+!bin/**
+!syntaxes/*.json
+!language-configuration.json
 !docs/example.gif
 !icon.png
 !LICENSE
 !package.json
 !README.md
+
+!dist/terminateProcess.sh

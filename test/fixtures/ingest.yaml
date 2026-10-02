@@ -1,0 +1,390 @@
+export:
+  ingest/collection:
+    input:
+      label: redpanda
+      redpanda:
+        seed_brokers:
+          - ${KAFKA_BROKERS}
+        topics:
+          - tmdb.normalized.collection
+        consumer_group: tmdb.ingest.collection.v1
+        start_from_oldest: true
+        fetch_max_bytes: 2mb
+        fetch_max_partition_bytes: 2mb
+        fetch_max_wait: 5s
+        max_yield_batch_bytes: 2mb
+        partition_buffer_bytes: 2mb
+      processors:
+        - label: kafka_meta_collection
+          mapping: |-
+            meta tmdb_id = this.data.id
+            meta tmdb_kind = "collection"
+            meta tmdb_version = this.meta.ts
+
+            root = this.assign({
+            	"data": {
+            		"version_ts": this.meta.ts
+            	}
+            })
+    output:
+      broker:
+        outputs:
+          - label: collection
+            processors:
+              - label: mapping_collection
+                mapping: from "ingest/mapping/collection/collection.blobl"
+              - label: dedup_meta_collection
+                mapping: |-
+                  root = this.assign({
+                    "version_ts": this.version_ts.or(@tmdb_version)
+                  })
+              - label: dedup_group_collection
+                group_by_value:
+                  value: ${! json("id") }
+              - label: dedup_archive_collection
+                archive:
+                  format: json_array
+              - label: dedup_sort_collection
+                mapping: root = this.sort_by(e -> e.version_ts).index(-1)
+            sql_insert:
+              driver: pgx
+              dsn: ${POSTGRES_URL}
+              table: '"${PG_SCHEMA}"."collection"'
+              columns:
+                - '"id"'
+                - '"name"'
+                - '"overview"'
+                - '"poster_path"'
+                - '"backdrop_path"'
+                - '"original_name"'
+                - '"original_language"'
+                - '"version_ts"'
+              args_mapping: |-
+                root = [
+                  this.id,
+                  this.name,
+                  this.overview,
+                  this.poster_path,
+                  this.backdrop_path,
+                  this.original_name,
+                  this.original_language,
+                  this.version_ts,
+                ]
+              suffix: |-
+                ON CONFLICT (
+                  "id"
+                )
+                DO UPDATE SET
+                  "id" = EXCLUDED."id",
+                  "name" = EXCLUDED."name",
+                  "overview" = EXCLUDED."overview",
+                  "poster_path" = EXCLUDED."poster_path",
+                  "backdrop_path" = EXCLUDED."backdrop_path",
+                  "original_name" = EXCLUDED."original_name",
+                  "original_language" = EXCLUDED."original_language",
+                  "version_ts" = EXCLUDED."version_ts",
+                  "updated_ts" = EXCLUDED."updated_ts"
+              max_in_flight: ${INGEST_MAX_IN_FLIGHT}
+              conn_max_open: ${INGEST_CONN_MAX_OPEN}
+              conn_max_idle: ${INGEST_CONN_MAX_IDLE}
+              conn_max_life_time: ${INGEST_CONN_MAX_LIFE_TIME}
+          - label: collection_part
+            processors:
+              - label: mapping_collection_part
+                mapping: from "ingest/mapping/collection/collection_part.blobl"
+              - label: unarchive_collection_part
+                unarchive:
+                  format: json_array
+              - label: dedup_meta_collection_part
+                mapping: |-
+                  root = this.assign({
+                    "version_ts": this.version_ts.or(@tmdb_version)
+                  })
+              - label: dedup_group_collection_part
+                group_by_value:
+                  value: ${! json("collection_id") }:${! json("part_id") }
+              - label: dedup_archive_collection_part
+                archive:
+                  format: json_array
+              - label: dedup_sort_collection_part
+                mapping: root = this.sort_by(e -> e.version_ts).index(-1)
+            sql_insert:
+              driver: pgx
+              dsn: ${POSTGRES_URL}
+              table: '"${PG_SCHEMA}"."collection_part"'
+              columns:
+                - '"collection_id"'
+                - '"part_id"'
+                - '"part_index"'
+                - '"media_type"'
+                - '"version_ts"'
+              args_mapping: |-
+                root = [
+                  this.collection_id,
+                  this.part_id,
+                  this.part_index,
+                  this.media_type,
+                  this.version_ts,
+                ]
+              suffix: |-
+                ON CONFLICT (
+                  "collection_id",
+                  "part_id"
+                )
+                DO UPDATE SET
+                  "part_index" = EXCLUDED."part_index",
+                  "media_type" = EXCLUDED."media_type",
+                  "version_ts" = EXCLUDED."version_ts"
+              max_in_flight: ${INGEST_MAX_IN_FLIGHT}
+              conn_max_open: ${INGEST_CONN_MAX_OPEN}
+              conn_max_idle: ${INGEST_CONN_MAX_IDLE}
+              conn_max_life_time: ${INGEST_CONN_MAX_LIFE_TIME}
+  ingest/keyword:
+    input:
+      label: redpanda
+      redpanda:
+        seed_brokers:
+          - ${KAFKA_BROKERS}
+        topics:
+          - tmdb.normalized.keyword
+        consumer_group: tmdb.ingest.keyword.v1
+        start_from_oldest: true
+        fetch_max_bytes: 100kb
+        fetch_max_partition_bytes: 100kb
+        fetch_max_wait: 5s
+        max_yield_batch_bytes: 100kb
+        partition_buffer_bytes: 100kb
+      processors:
+        - label: kafka_meta_keyword
+          mapping: |-
+            meta tmdb_id = this.data.id
+            meta tmdb_kind = "keyword"
+            meta tmdb_version = this.meta.ts
+
+            root = this.assign({
+            	"data": {
+            		"version_ts": this.meta.ts
+            	}
+            })
+    output:
+      broker:
+        outputs:
+          - label: keyword
+            processors:
+              - label: mapping_keyword
+                mapping: from "ingest/mapping/keyword/keyword.blobl"
+              - label: dedup_meta_keyword
+                mapping: |-
+                  root = this.assign({
+                    "version_ts": this.version_ts.or(@tmdb_version)
+                  })
+              - label: dedup_group_keyword
+                group_by_value:
+                  value: ${! json("id") }:${! json("kind") }
+              - label: dedup_archive_keyword
+                archive:
+                  format: json_array
+              - label: dedup_sort_keyword
+                mapping: root = this.sort_by(e -> e.version_ts).index(-1)
+            sql_insert:
+              driver: pgx
+              dsn: ${POSTGRES_URL}
+              table: '"${PG_SCHEMA}"."facet"'
+              columns:
+                - '"id"'
+                - '"kind"'
+                - '"name"'
+              args_mapping: |-
+                root = [
+                  this.id,
+                  this.kind,
+                  this.name,
+                ]
+              suffix: |-
+                ON CONFLICT (
+                  "id",
+                  "kind"
+                )
+                DO UPDATE SET
+                  "name" = EXCLUDED."name",
+                  "updated_ts" = EXCLUDED."updated_ts"
+              max_in_flight: ${INGEST_MAX_IN_FLIGHT}
+              conn_max_open: ${INGEST_CONN_MAX_OPEN}
+              conn_max_idle: ${INGEST_CONN_MAX_IDLE}
+              conn_max_life_time: ${INGEST_CONN_MAX_LIFE_TIME}
+  ingest/movie:
+    input:
+      label: redpanda
+      redpanda:
+        seed_brokers:
+          - ${KAFKA_BROKERS}
+        topics:
+          - tmdb.normalized.movie
+        consumer_group: tmdb.ingest.movie.v1
+        start_from_oldest: true
+        fetch_max_bytes: 30mb
+        fetch_max_partition_bytes: 30mb
+        fetch_max_wait: 5s
+        max_yield_batch_bytes: 30mb
+        partition_buffer_bytes: 30mb
+      processors:
+        - label: kafka_meta_movie
+          mapping: |-
+            meta tmdb_id = this.data.id
+            meta tmdb_kind = "movie"
+            meta tmdb_version = this.meta.ts
+
+            root = this.assign({
+            	"data": {
+            		"version_ts": this.meta.ts
+            	}
+            })
+    output:
+      broker:
+        outputs:
+          - label: title_movie
+            processors:
+              - label: mapping_title_movie
+                mapping: from "ingest/mapping/movie/title_movie.blobl"
+              - label: dedup_meta_title_movie
+                mapping: |-
+                  root = this.assign({
+                    "version_ts": this.version_ts.or(@tmdb_version)
+                  })
+              - label: dedup_group_title_movie
+                group_by_value:
+                  value: ${! json("title_id") }
+              - label: dedup_archive_title_movie
+                archive:
+                  format: json_array
+              - label: dedup_sort_title_movie
+                mapping: root = this.sort_by(e -> e.version_ts).index(-1)
+            sql_insert:
+              driver: pgx
+              dsn: ${POSTGRES_URL}
+              table: '"${PG_SCHEMA}"."title_movie"'
+              columns:
+                - '"title_id"'
+                - '"budget"'
+                - '"revenue"'
+                - '"runtime"'
+                - '"imdb_id"'
+                - '"collection_id"'
+                - '"video"'
+                - '"version_ts"'
+              args_mapping: |-
+                root = [
+                  this.title_id,
+                  this.budget,
+                  this.revenue,
+                  this.runtime,
+                  this.imdb_id,
+                  this.collection_id,
+                  this.video,
+                  this.version_ts,
+                ]
+              suffix: |-
+                ON CONFLICT (
+                  "title_id"
+                )
+                DO UPDATE SET
+                  "budget" = EXCLUDED."budget",
+                  "revenue" = EXCLUDED."revenue",
+                  "runtime" = EXCLUDED."runtime",
+                  "imdb_id" = EXCLUDED."imdb_id",
+                  "collection_id" = EXCLUDED."collection_id",
+                  "video" = EXCLUDED."video",
+                  "version_ts" = EXCLUDED."version_ts"
+              max_in_flight: ${INGEST_MAX_IN_FLIGHT}
+              conn_max_open: ${INGEST_CONN_MAX_OPEN}
+              conn_max_idle: ${INGEST_CONN_MAX_IDLE}
+              conn_max_life_time: ${INGEST_CONN_MAX_LIFE_TIME}
+          - label: release_date
+            processors:
+              - label: mapping_release_date
+                mapping: from "ingest/mapping/movie/release_date.blobl"
+              - label: unarchive_release_date
+                unarchive:
+                  format: json_array
+              - label: dedup_meta_release_date
+                mapping: |-
+                  root = this.assign({
+                    "version_ts": this.version_ts.or(@tmdb_version)
+                  })
+              - label: dedup_group_release_date
+                group_by_value:
+                  value: ${! json("title_id") }:${! json("iso_3166_1") }:${! json("type") }:${! json("release_date") }
+              - label: dedup_archive_release_date
+                archive:
+                  format: json_array
+              - label: dedup_sort_release_date
+                mapping: root = this.sort_by(e -> e.version_ts).index(-1)
+            sql_insert:
+              driver: pgx
+              dsn: ${POSTGRES_URL}
+              table: '"${PG_SCHEMA}"."title_release_date"'
+              columns:
+                - '"title_id"'
+                - '"iso_3166_1"'
+                - '"type"'
+                - '"release_date"'
+                - '"certification"'
+                - '"descriptors"'
+                - '"iso_639_1"'
+                - '"note"'
+                - '"version_ts"'
+              args_mapping: |-
+                root = [
+                  this.title_id,
+                  this.iso_3166_1,
+                  this.type,
+                  this.release_date,
+                  this.certification,
+                  this.descriptors,
+                  this.iso_639_1,
+                  this.note,
+                  this.version_ts,
+                ]
+              suffix: |-
+                ON CONFLICT (
+                  "title_id",
+                  "iso_3166_1",
+                  "type",
+                  "release_date"
+                )
+                DO UPDATE SET
+                  "certification" = EXCLUDED."certification",
+                  "descriptors" = EXCLUDED."descriptors",
+                  "iso_639_1" = EXCLUDED."iso_639_1",
+                  "note" = EXCLUDED."note",
+                  "version_ts" = EXCLUDED."version_ts"
+              max_in_flight: ${INGEST_MAX_IN_FLIGHT}
+              conn_max_open: ${INGEST_CONN_MAX_OPEN}
+              conn_max_idle: ${INGEST_CONN_MAX_IDLE}
+              conn_max_life_time: ${INGEST_CONN_MAX_LIFE_TIME}
+          - label: title
+            processors:
+              - label: mapping_title
+                mapping: from "ingest/mapping/.title/title.blobl"
+              - label: dedup_meta_title
+                mapping: |-
+                  root = this.assign({
+                    "version_ts": this.version_ts.or(@tmdb_version)
+                  })
+              - label: dedup_group_title
+                group_by_value:
+                  value: ${! json("id") }:${! json("kind") }
+              - label: dedup_archive_title
+                archive:
+                  format: json_array
+              - label: dedup_sort_title
+                mapping: root = this.sort_by(e -> e.version_ts).index(-1)
+            sql_insert:
+              driver: pgx
+              dsn: ${POSTGRES_URL}
+              table: '"${PG_SCHEMA}"."title"'
+              columns:
+                - '"id"'
+                - '"kind"'
+                - '"name"'
+                - '"original_name"'
