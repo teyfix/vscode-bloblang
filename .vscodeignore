@@ -1,6 +1,5 @@
 **
 !dist/extension.js
-!bin/**
 !syntaxes/*.json
 !schemas/*.json
 !language-configuration.json

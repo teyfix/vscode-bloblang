@@ -26,6 +26,7 @@ import {
   getServerChannel,
 } from './lib/channels';
 import { clientLogger } from './lib/logger';
+import { downloadLatestServer } from './lib/releases';
 
 let client: LanguageClient | undefined;
 let watchers: ReturnType<typeof workspace.createFileSystemWatcher>[] = [];
@@ -78,24 +79,7 @@ async function serverCommand(context: ExtensionContext): Promise<string> {
     );
     return command;
   }
-  const command = context.asAbsolutePath(
-    path.join(
-      'bin',
-      `${process.platform}-${process.arch}`,
-      `bloblang-lsp${process.platform === 'win32' ? '.exe' : ''}`,
-    ),
-  );
-  try {
-    await access(
-      command,
-      process.platform === 'win32' ? constants.F_OK : constants.X_OK,
-    );
-  } catch {
-    throw new Error(
-      `No bundled Bloblang server for ${process.platform}-${process.arch}. Set bloblang.server.path to a built bloblang-lsp binary or install the package for your platform.`,
-    );
-  }
-  return command;
+  return downloadLatestServer(context.globalStorageUri.fsPath);
 }
 
 async function stopClient(): Promise<void> {

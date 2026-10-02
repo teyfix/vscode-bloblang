@@ -1,7 +1,7 @@
 {
   "name": "vscode-bloblang",
   "displayName": "Bloblang",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Bloblang language support for VS Code",
   "categories": [
     "Programming Languages",
@@ -30,8 +30,7 @@
     "grammars": "bun scripts/generate-grammars.ts",
     "test": "bun test",
     "check": "bun run grammars && bun run typecheck && bun run lint && bun test",
-    "bundle:server": "bun scripts/bundle-server.ts",
-    "package": "bun run schema && bun run check && bun run bundle:server && bun run build:min && bun scripts/package.ts",
+    "package": "bun run schema && bun run check && bun run build:min && bun scripts/package.ts",
     "build:smoke": "bun build test/extension-host.ts --outfile dist/smoke.cjs --format cjs --target node --external vscode",
     "schema": "bun scripts/generate-schema.ts"
   },
@@ -104,7 +103,7 @@
           "type": "string",
           "default": "",
           "scope": "machine-overridable",
-          "description": "Path or PATH command for bloblang-lsp. Empty uses the bundled server. Supports ${workspaceFolder} and ${userHome}."
+          "description": "Path or PATH command for bloblang-lsp. Empty downloads the latest release and reuses a cached copy offline. Supports ${workspaceFolder} and ${userHome}."
         },
         "bloblang.server.args": {
           "type": "array",

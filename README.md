@@ -2,7 +2,8 @@
 
 Bloblang highlighting, diagnostics, formatting, completion, hover, definitions,
 and references, powered by [bloblang-lsp](https://github.com/teyfix/bloblang-lsp).
-The packaged extension includes the server; activation does not download anything.
+The extension downloads the latest bloblang-lsp release on activation and caches
+the verified binary for offline use. It checks for a newer release on each start.
 If another extension also provides Bloblang, disable one provider to avoid duplicate
 language servers. This extension includes its own grammars and needs no Benthos
 extension.
@@ -38,7 +39,7 @@ features continue to belong to the CUE extension.
   blocks are rewritten as literal blocks. Your default YAML formatter stays usable.
 - Use **Format Document** in Bloblang files.
 
-`bloblang.server.path` overrides the bundled binary with a path or PATH command.
+`bloblang.server.path` overrides the downloaded binary with a path or PATH command.
 It supports `${workspaceFolder}` and `${userHome}`; relative paths are resolved
 from the first workspace folder. `bloblang.server.args` supplies server arguments.
 `bloblang.yaml.enabled` controls YAML server features (highlighting is always
@@ -224,32 +225,22 @@ preview in a temporary YAML or JSON file using the originating document's settin
 ## Build and package
 
 Install [Bun](https://bun.sh), Go matching the sibling server's `go.mod`, and a C
-compiler for its current Tree-sitter binding. Keep `bloblang-lsp` and
-`tree-sitter-bloblang` beside this repo. The server uses the local grammar module
-through its Go module replacement:
+compiler for schema generation. Keep `bloblang-lsp` beside this repo while
+building the extension:
 
 ```sh
 bun install --frozen-lockfile
 bun run check
 bun run package
-code --install-extension vscode-bloblang-linux-x64-0.2.0.vsix
+code --install-extension vscode-bloblang-0.2.1.vsix
 ```
 
-The package contains `dist/extension.js`, language grammars/configuration,
-`schemas/bloblangrc.schema.json`, and `bin/<platform>-<arch>/bloblang-lsp`.
-JavaScript dependencies are bundled. Packaging rebuilds the current sibling server
-(including its generated C parser) and targets the host platform. For another server
-checkout set `BLOBLANG_LSP_REPO`; to package an already built binary set
-`BLOBLANG_LSP_BINARY`. Schema generation still uses the server checkout and Go when
-a binary is supplied. Cross packaging requires a binary already built for the
-destination platform:
-
-```sh
-VSCE_TARGET=linux-arm64 BLOBLANG_LSP_BINARY=/path/to/arm64/bloblang-lsp bun run package
-```
-
-The build places that binary under the correct runtime platform folder and writes
-the matching VSIX platform manifest. Linux glibc and musl builds are separate targets.
+The universal package contains `dist/extension.js`, language grammars/configuration,
+and `schemas/bloblangrc.schema.json`; it contains no server binary. JavaScript
+dependencies are bundled. On activation, the extension downloads the latest
+server asset for the host platform from GitHub Releases and checks its SHA-256
+against the release's `SHA256SUMS`. A verified cached server works offline. Set
+`BLOBLANG_LSP_REPO` to use another checkout for schema generation.
 
 Development can use `bloblang.server.path` pointing to the sibling server binary.
 The configuration schema is generated from the server rule registry; run
