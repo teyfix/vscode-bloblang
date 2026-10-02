@@ -4,7 +4,7 @@
 !syntaxes/*.json
 !schemas/*.json
 !language-configuration.json
-!docs/example.gif
+!docs/demos/*.gif
 !icon.png
 !LICENSE
 !package.json

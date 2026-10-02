@@ -7,6 +7,8 @@ If another extension also provides Bloblang, disable one provider to avoid dupli
 language servers. This extension includes its own grammars and needs no Benthos
 extension.
 
+![Typing a Bloblang mapping with live syntax highlighting and completion](docs/demos/typing.gif)
+
 Open a `.blobl` or `.bloblang` file. Bloblang is also highlighted inside YAML
 `mapping`, `request_map`, `result_map`, `args_mapping`, `fields_mapping`, `check`,
 and test `bloblang` values, including literal/folded blocks and quoted/plain
@@ -17,6 +19,8 @@ completion and navigation with positions mapped to the original document. Mappin
 values also receive formatting; interpolation expressions are not formatted.
 External `mapping: from "mapping.blobl"` values support file navigation and missing
 file diagnostics.
+
+![Bloblang highlighted inside quoted YAML mapping and check values](docs/demos/yaml-highlighting.gif)
 
 With a CUE extension providing the host grammar, CUE mapping strings (ordinary,
 raw and multiline) and interpolation receive highlighting. CUE language server
@@ -80,6 +84,8 @@ comments and string contents, collapses short expressions, wraps longer ones,
 and keeps unary operators adjacent to their operands, such as `index(-1)`. Width
 guides expression layout; preserved strings and comments can exceed it.
 
+![Formatting a Bloblang object to fit the configured print width](docs/demos/formatting.gif)
+
 Rule keys remain flat for autocomplete; their slash-separated IDs group related
 rules. Each accepts `off`, `hint`, `info`, `warn`, or `error`, or an object with
 `severity` and its documented options. Only `style/assignments/prefer-grouped`
@@ -121,6 +127,8 @@ where direct field assignments replace them; `.any()` short-circuits, which can
 change predicate errors or side effects. Formatting does not apply lint refactors.
 See the server's [lint guide](https://github.com/teyfix/bloblang-lsp/blob/7b72549726b37a784405b72aabcb93f4ab7455c4/docs/features/lint.md)
 for the rule conditions and examples.
+
+![A Bloblang lint diagnostic and its explicit Quick Fix](docs/demos/lint-quick-fix.gif)
 
 ## Sample input and metadata
 
@@ -208,6 +216,8 @@ without a sample, ordinary documentation and completion remain available.
 For large values, **Show Input** and **Show Output** lenses open the full formatted
 preview in a temporary YAML or JSON file using the originating document's settings.
 **Open Sample** lenses open the selected sample files.
+
+![Sampled hover previews for input and output values](docs/demos/sample-hover.gif)
 
 ## Build and package
 
