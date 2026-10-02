@@ -40,8 +40,10 @@ Startup failures offer logs and settings.
 
 Create `.bloblangrc.json` in the document's workspace. VS Code automatically
 provides configuration completion and validation through the bundled schema.
-Changes apply without restarting the server. Defaults are 80 columns, YAML
-previews, and all lint rules enabled at warning severity:
+Each document uses its containing workspace root; without a workspace, configuration
+is read from the document's parent directory. Changes apply without restarting the
+server. Defaults are 80 columns and YAML previews. All lint rules are enabled:
+`prefer-with` and `prefer-any` start as hints; the others start as warnings:
 
 ```json
 {
@@ -144,6 +146,7 @@ check: |
   !errored() && this.state != "processing-ready"
 ```
 
+Place the comment immediately before the mapping key, at the same indentation.
 Explicit sample paths resolve relative to the YAML file. A missing explicit file
 is an error at its comment; missing automatic samples remain informational. File
 creation, updates, and deletion refresh previews.

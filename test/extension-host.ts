@@ -48,7 +48,7 @@ export async function run(): Promise<void> {
   );
   await writeFile(
     mappingFile,
-    'root.name=this.name.uppercase()\nroot.topic=meta("topic")\nlet person = this.name\nroot.person = $person\n',
+    'root.name =  this.name.uppercase()\nroot.topic =  meta("topic")\nlet person = this.name\nroot.person = $person\nroot.unused = deleted()\n',
   );
   const document = await vscode.workspace.openTextDocument(mappingFile);
   await vscode.window.showTextDocument(document);
@@ -73,7 +73,7 @@ export async function run(): Promise<void> {
     await vscode.commands.executeCommand<vscode.CompletionList>(
       'vscode.executeCompletionItemProvider',
       document.uri,
-      new vscode.Position(0, 19),
+      new vscode.Position(0, 23),
       '.',
     );
   assert.ok(completion?.items.length, 'Completions available');
@@ -86,9 +86,27 @@ export async function run(): Promise<void> {
   const inputHover = await vscode.commands.executeCommand<vscode.Hover[]>(
     'vscode.executeHoverProvider',
     document.uri,
-    new vscode.Position(0, 12),
+    new vscode.Position(0, 15),
   );
   assert.ok(hoverText(inputHover).includes('Ada'), 'Sample input hover');
+  const declarationHover = await vscode.commands.executeCommand<vscode.Hover[]>(
+    'vscode.executeHoverProvider',
+    document.uri,
+    new vscode.Position(2, 6),
+  );
+  assert.ok(
+    hoverText(declarationHover).includes('Ada'),
+    'Let declaration value hover',
+  );
+  const deletedHover = await vscode.commands.executeCommand<vscode.Hover[]>(
+    'vscode.executeHoverProvider',
+    document.uri,
+    new vscode.Position(4, 17),
+  );
+  assert.ok(
+    hoverText(deletedHover).includes('deleted'),
+    'Deletion documentation hover',
+  );
   const definitions = await vscode.commands.executeCommand<
     (vscode.Location | vscode.LocationLink)[]
   >(
@@ -136,6 +154,23 @@ export async function run(): Promise<void> {
     yaml.getText().includes('root.name = this.name.uppercase()'),
     'YAML embedded formatting applied',
   );
+  const nextLineFile = path.join(folder, 'next-line.yaml');
+  await writeFile(nextLineFile, "check:\n  '!errored()'\nlabel: unchanged\n");
+  const nextLine = await vscode.workspace.openTextDocument(nextLineFile);
+  await vscode.window.showTextDocument(nextLine);
+  const nextLineHover = await until(
+    () =>
+      vscode.commands.executeCommand<vscode.Hover[]>(
+        'vscode.executeHoverProvider',
+        nextLine.uri,
+        new vscode.Position(1, 5),
+      ),
+    (value) => hoverText(value).includes('errored'),
+  );
+  assert.ok(
+    hoverText(nextLineHover).includes('errored'),
+    'Expression hover in next-line YAML quoted scalar',
+  );
   const invalidFile = path.join(folder, 'invalid.blobl');
   await writeFile(invalidFile, 'root = this.\n');
   const invalid = await vscode.workspace.openTextDocument(invalidFile);
@@ -162,7 +197,7 @@ export async function run(): Promise<void> {
   assert.ok(registered.includes('bloblang.formatEmbeddedMappings'));
   await vscode.commands.executeCommand('bloblang.restartServer');
   console.log(
-    'Bloblang extension smoke passed: offline bundled startup, registration, static/sample hover, completion, formatting, YAML mapping, diagnostics, untitled, restart',
+    'Bloblang extension smoke passed: offline bundled startup, registration, static/sample/declaration/deletion hover, completion, formatting, YAML mapping and next-line expressions, diagnostics, untitled, restart',
   );
   await writeFile(path.join(folder, 'passed.txt'), 'passed\n');
 }

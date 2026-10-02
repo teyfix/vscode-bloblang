@@ -98,7 +98,7 @@
               ]
             },
             "style/arrays/prefer-any": {
-              "default": "warn",
+              "default": "hint",
               "description": "Use any for an existence check, accounting for short-circuit behavior.",
               "oneOf": [
                 {
@@ -208,7 +208,7 @@
               ]
             },
             "style/objects/prefer-with": {
-              "default": "warn",
+              "default": "hint",
               "description": "Use with for a projection of same-named fields, accounting for missing properties.",
               "oneOf": [
                 {
