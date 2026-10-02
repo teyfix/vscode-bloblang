@@ -133,13 +133,7 @@ export async function getReleases({ context }: { context: ExtensionContext }) {
 
 function getOsType(): string {
   const name = os.type().toLowerCase();
-  switch (name) {
-    case 'win32':
-    case 'windows_nt':
-      return 'windows';
-    default:
-      return name;
-  }
+  return ['win32', 'windows_nt'].includes(name) ? 'windows' : name;
 }
 
 function getOsArch(): string {
