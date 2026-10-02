@@ -197,3 +197,78 @@ test('unfinished mapping object does not swallow following YAML fields', async (
     ),
   ).toBe(false);
 });
+
+test('YAML quoted mappings beginning after a key-only line retain Bloblang scopes', async () => {
+  const grammar = await registry.loadGrammar('source.yaml');
+  if (!grammar) throw new Error('Missing YAML grammar');
+  const tokens = tokenize(
+    grammar,
+    String.raw`pipeline:
+  mapping:
+    'root.foo = this.foo
+     root.message = "it''s fine"'
+  label: ordinary_yaml
+  check: # expression-only mapping
+    "!errored() && this.message != \"ready\"
+     && this.ready"
+  after: ordinary_yaml
+  request_map:
+    # a comment before the quoted value
+    'root = this'
+  "following": "root = this"
+  result_map:
+  label: ordinary_yaml`,
+  );
+  expect(hasToken(tokens[2] ?? [], 'root', 'variable.language.bloblang')).toBe(
+    true,
+  );
+  expect(hasToken(tokens[3] ?? [], 'root', 'variable.language.bloblang')).toBe(
+    true,
+  );
+  expect(
+    hasToken(tokens[6] ?? [], 'errored', 'support.function.bloblang'),
+  ).toBe(true);
+  expect(hasToken(tokens[7] ?? [], 'this', 'variable.language.bloblang')).toBe(
+    true,
+  );
+  expect(hasToken(tokens[11] ?? [], 'root', 'variable.language.bloblang')).toBe(
+    true,
+  );
+  for (const line of [4, 8, 12, 14])
+    expect(
+      tokens[line]?.some((token) =>
+        token.scopes.includes('meta.embedded.inline.bloblang'),
+      ),
+    ).toBe(false);
+});
+
+test('next-line quoted sequence values and escaped host quotes return to YAML', async () => {
+  const grammar = await registry.loadGrammar('source.yaml');
+  if (!grammar) throw new Error('Missing YAML grammar');
+  const tokens = tokenize(
+    grammar,
+    String.raw`processors:
+  - mapping:
+      "root = \"quoted \\\"value\\\"\"
+       root.foo = this.foo"
+    label: unchanged
+  - check:
+      '!errored()'
+    label: unchanged`,
+  );
+  expect(hasToken(tokens[2] ?? [], 'root', 'variable.language.bloblang')).toBe(
+    true,
+  );
+  expect(hasToken(tokens[3] ?? [], 'root', 'variable.language.bloblang')).toBe(
+    true,
+  );
+  expect(
+    hasToken(tokens[6] ?? [], 'errored', 'support.function.bloblang'),
+  ).toBe(true);
+  for (const line of [4, 7])
+    expect(
+      tokens[line]?.some((token) =>
+        token.scopes.includes('meta.embedded.inline.bloblang'),
+      ),
+    ).toBe(false);
+});

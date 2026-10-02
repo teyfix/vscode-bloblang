@@ -132,6 +132,36 @@ const interpolationContent = {
     include('source.bloblang.teyfix'),
   ],
 };
+const yamlSingleQuote = {
+  begin: "(')",
+  end: "'(?!')",
+  contentName: 'meta.embedded.inline.bloblang',
+  beginCaptures: { 1: { name: 'punctuation.definition.string.begin.yaml' } },
+  endCaptures: { 0: { name: 'punctuation.definition.string.end.yaml' } },
+  patterns: [
+    { match: "''", name: 'constant.character.escape.yaml' },
+    include('source.bloblang.teyfix'),
+  ],
+};
+const yamlDoubleQuote = {
+  begin: '(")',
+  end: '"',
+  contentName: 'meta.embedded.inline.bloblang',
+  beginCaptures: { 1: { name: 'punctuation.definition.string.begin.yaml' } },
+  endCaptures: { 0: { name: 'punctuation.definition.string.end.yaml' } },
+  patterns: [
+    {
+      begin: '\\\\"',
+      end: '\\\\"',
+      name: 'string.quoted.double.bloblang',
+      patterns: [
+        { match: '\\\\\\\\.', name: 'constant.character.escape.bloblang' },
+      ],
+    },
+    { match: '\\\\.', name: 'constant.character.escape.yaml' },
+    include('source.bloblang.teyfix'),
+  ],
+};
 const yaml = {
   scopeName: 'bloblang.injection.yaml',
   injectionSelector:
@@ -158,39 +188,29 @@ const yaml = {
       patterns: [include('source.bloblang.teyfix')],
     },
     {
+      ...yamlSingleQuote,
       begin: `${keyPrefix}(')`,
-      end: "'(?!')",
-      contentName: 'meta.embedded.inline.bloblang',
       beginCaptures: {
         ...keyCaptures,
         4: { name: 'punctuation.definition.string.begin.yaml' },
       },
-      endCaptures: { 0: { name: 'punctuation.definition.string.end.yaml' } },
-      patterns: [
-        { match: "''", name: 'constant.character.escape.yaml' },
-        include('source.bloblang.teyfix'),
-      ],
     },
     {
+      ...yamlDoubleQuote,
       begin: `${keyPrefix}(")`,
-      end: '"',
-      contentName: 'meta.embedded.inline.bloblang',
       beginCaptures: {
         ...keyCaptures,
         4: { name: 'punctuation.definition.string.begin.yaml' },
       },
-      endCaptures: { 0: { name: 'punctuation.definition.string.end.yaml' } },
+    },
+    {
+      begin: `${keyPrefix}(?:#.*)?$`,
+      end: `(?<=^[ \\t]*)(?=\\S)(?<!^\\1[ \\t]+)|(?<=^[ \\t]*)(?=[^"'#\\s])|(?<=["'])(?=[ \\t]*(?:#|$))`,
+      beginCaptures: keyCaptures,
       patterns: [
-        {
-          begin: '\\\\"',
-          end: '\\\\"',
-          name: 'string.quoted.double.bloblang',
-          patterns: [
-            { match: '\\\\\\\\.', name: 'constant.character.escape.bloblang' },
-          ],
-        },
-        { match: '\\\\.', name: 'constant.character.escape.yaml' },
-        include('source.bloblang.teyfix'),
+        { match: '(?<=^[ \\t]*)#.*$', name: 'comment.line.number-sign.yaml' },
+        { ...yamlSingleQuote, begin: `(?<=^[ \\t]+)(')` },
+        { ...yamlDoubleQuote, begin: `(?<=^[ \\t]+)(")` },
       ],
     },
     {
