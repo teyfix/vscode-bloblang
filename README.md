@@ -10,7 +10,8 @@ extension.
 Open a `.blobl` or `.bloblang` file. Bloblang is also highlighted inside YAML
 `mapping`, `request_map`, `result_map`, `args_mapping`, `fields_mapping`, `check`,
 and test `bloblang` values, including literal/folded blocks and quoted/plain
-scalars. `${! ... }` interpolation is highlighted in YAML strings. Embedded YAML
+scalars. Quoted scalar values may begin on the line after the mapping key and
+span multiple lines. `${! ... }` interpolation is highlighted in YAML strings. Embedded YAML
 also receives server diagnostics, hover, completion, navigation and formatting
 with positions mapped to the original document.
 
@@ -34,6 +35,75 @@ available). `bloblang.trace.server` enables protocol logging. Lifecycle messages
 stay in the output channels. A quiet status bar indicator shows starting, ready,
 or failed; click it to open server logs. Initialization shows no notification.
 Startup failures offer logs and settings.
+
+## Workspace configuration and linting
+
+Create `.bloblangrc.json` in the document's workspace. VS Code automatically
+provides configuration completion and validation through the bundled schema.
+Changes apply without restarting the server. Defaults are 80 columns, YAML
+previews, and all lint rules enabled at warning severity:
+
+```json
+{
+  "formatter": { "printWidth": 80 },
+  "preview": { "format": "yaml" },
+  "lint": {
+    "enabled": true,
+    "rules": {
+      "correctness/environment/require-fallback": "warn",
+      "correctness/variables/no-unused-let": "warn",
+      "style/assignments/prefer-grouped": {
+        "severity": "warn",
+        "minAssignments": 3
+      },
+      "style/objects/prefer-with": "hint",
+      "style/objects/prefer-without": "warn",
+      "style/objects/combine-without": "warn",
+      "style/arrays/prefer-any": "hint"
+    }
+  }
+}
+```
+
+`printWidth` accepts integers from 20 to 1000. Set `preview.format` to `json`
+for JSON previews. Hovers, inlay tooltips, and output previews use the same format
+and width; short collections stay together when they fit. The formatter preserves
+comments and string contents, collapses short expressions, wraps longer ones,
+and keeps unary operators adjacent to their operands, such as `index(-1)`.
+
+Rule keys remain flat for autocomplete; their slash-separated IDs group related
+rules. Each accepts `off`, `hint`, `info`, `warn`, or `error`, or an object with
+`severity` and its documented options. Only `style/assignments/prefer-grouped`
+accepts `minAssignments` (at least 3). Unknown keys and invalid options are reported
+without stopping other language features.
+
+| Rule | Suggestion |
+| --- | --- |
+| `correctness/environment/require-fallback` | Handle an unset `env()` with a default or explicit failure. |
+| `correctness/variables/no-unused-let` | Report a binding that is never referenced in its scope. |
+| `style/assignments/prefer-grouped` | Group consecutive field assignments when output state allows it. |
+| `style/objects/prefer-with` | Use `.with(...)` for a projection of the receiver's same-named fields. |
+| `style/objects/prefer-without` | Use `.without(...)` when copying an object then deleting fields. |
+| `style/objects/combine-without` | Combine consecutive `.without(...)` calls. |
+| `style/arrays/prefer-any` | Use `.any(...)` for a filtered array existence check. |
+
+For example, `env("ARTIFACT_DIR").or("./artifacts")` supplies a default, and
+`env("ARTIFACT_DIR").or(throw("ARTIFACT_DIR is required"))` explicitly fails.
+An unset environment variable returns `null`, so `.catch(...)` by itself does not
+handle it; `.not_null().catch(...)` does.
+
+Suppress a rule for the next source line with its full ID:
+
+```bloblang
+# bloblang-lint-disable-next-line correctness/environment/require-fallback -- guaranteed by the launcher
+root.artifact_dir = env("ARTIFACT_DIR")
+```
+
+Diagnostics and Quick Fixes use these same IDs in standalone and embedded YAML
+mappings. Refactors account for missing properties, nested object merging, output
+state, errors, and side effects. Explicit Quick Fixes can require a semantic choice;
+only proven equivalent edits participate in Fix All. Formatting applies no lint
+refactors.
 
 ## Sample input and metadata
 
@@ -61,6 +131,23 @@ still work. Multiple matching sibling sample files produce a diagnostic so sampl
 selection is unambiguous. Invalid sample files or directives disable preview,
 while static diagnostics, documentation and navigation remain available. Changes, creation and deletion of sample files refresh the server.
 
+YAML inline mappings are numbered in document order from `001`. For
+`pipeline.yaml`, selection checks an explicit adjacent comment first, then
+`pipeline.sample-001.json` for the first mapping, then the shared
+`pipeline.sample.json`. JSON, YAML, and YML are supported at each level. External
+`from` mappings do not consume a number. Selected files use the `$bloblang`
+envelope above.
+
+```yaml
+# bloblang-sample: pipeline.sample-001.json
+check: |
+  !errored() && this.state != "processing-ready"
+```
+
+Explicit sample paths resolve relative to the YAML file. A missing explicit file
+is an error at its comment; missing automatic samples remain informational. File
+creation, updates, and deletion refresh previews.
+
 Leading directives override the sample input or metadata:
 
 ```bloblang
@@ -86,6 +173,8 @@ root = this
 ```
 
 Sample hover shows the original input `this` and selected expression values.
+Hovering a variable name in `let name = expression` shows its assigned value when
+a valid sample is available, and later `$name` references use their current scope.
 Hovering the assignment target `root` shows the input at the first assignment,
 then the prior output before later assignments. Reading `root` on the right hand
 side evaluates the actual output state, which may be unavailable before its first
@@ -122,7 +211,9 @@ The build places that binary under the correct runtime platform folder and write
 the matching VSIX platform manifest. Linux glibc and musl builds are separate targets.
 
 Development can use `bloblang.server.path` pointing to the sibling server binary.
-Run `bun run build:watch`, then launch an Extension Development Host. Grammar tests
+The configuration schema is generated from the server rule registry; run
+`bun run schema` after changing rules or options. Packaging regenerates it before
+building. Run `bun run build:watch`, then launch an Extension Development Host. Grammar tests
 use checked-in host grammar fixtures and run without other projects or editor
 extensions. `bun run build:smoke` builds `dist/smoke.cjs`, an extension host test
 module; run it with an isolated VS Code profile and extensions directory to check

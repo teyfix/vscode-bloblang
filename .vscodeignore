@@ -2,6 +2,7 @@
 !dist/extension.js
 !bin/**
 !syntaxes/*.json
+!schemas/*.json
 !language-configuration.json
 !docs/example.gif
 !icon.png

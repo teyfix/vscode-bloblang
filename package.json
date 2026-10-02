@@ -31,8 +31,9 @@
     "test": "bun test",
     "check": "bun run grammars && bun run typecheck && bun run lint && bun test",
     "bundle:server": "bun scripts/bundle-server.ts",
-    "package": "bun run check && bun run bundle:server && bun run build:min && bun scripts/package.ts",
-    "build:smoke": "bun build test/extension-host.ts --outfile dist/smoke.cjs --format cjs --target node --external vscode"
+    "package": "bun run schema && bun run check && bun run bundle:server && bun run build:min && bun scripts/package.ts",
+    "build:smoke": "bun build test/extension-host.ts --outfile dist/smoke.cjs --format cjs --target node --external vscode",
+    "schema": "bun scripts/generate-schema.ts"
   },
   "contributes": {
     "commands": [
@@ -136,7 +137,15 @@
         "editor.insertSpaces": true,
         "editor.tabSize": 2
       }
-    }
+    },
+    "jsonValidation": [
+      {
+        "fileMatch": [
+          "**/.bloblangrc.json"
+        ],
+        "url": "./schemas/bloblangrc.schema.json"
+      }
+    ]
   },
   "activationEvents": [
     "onLanguage:bloblang",

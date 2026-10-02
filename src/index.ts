@@ -28,7 +28,7 @@ import {
 import { clientLogger } from './lib/logger';
 
 let client: LanguageClient | undefined;
-let watcher: ReturnType<typeof workspace.createFileSystemWatcher> | undefined;
+let watchers: ReturnType<typeof workspace.createFileSystemWatcher>[] = [];
 let restarting: Promise<void> | undefined;
 let status: StatusBarItem | undefined;
 
@@ -104,8 +104,8 @@ async function stopClient(): Promise<void> {
   try {
     if (current) await current.stop(3000);
   } finally {
-    watcher?.dispose();
-    watcher = undefined;
+    for (const watcher of watchers) watcher.dispose();
+    watchers = [];
   }
 }
 
@@ -120,9 +120,10 @@ async function startClient(context: ExtensionContext): Promise<void> {
     args,
     transport: TransportKind.stdio,
   };
-  const fileEvents = workspace.createFileSystemWatcher(
-    '**/*.{json,yaml,yml,blobl,bloblang}',
-  );
+  const fileEvents = [
+    workspace.createFileSystemWatcher('**/*.{json,yaml,yml,blobl,bloblang}'),
+    workspace.createFileSystemWatcher('**/.bloblangrc.json'),
+  ];
   const clientOptions: LanguageClientOptions = {
     documentSelector: [
       { scheme: 'file', language: 'bloblang' },
@@ -145,7 +146,7 @@ async function startClient(context: ExtensionContext): Promise<void> {
     clientOptions,
   );
   client = next;
-  watcher = fileEvents;
+  watchers = fileEvents;
   next.onDidChangeState(({ newState }) => {
     logger.debug('Server state: %s', newState);
     if (client !== next) return;
@@ -158,7 +159,8 @@ async function startClient(context: ExtensionContext): Promise<void> {
     logger.info('Starting %s', command);
     await next.start();
   } catch (error) {
-    fileEvents.dispose();
+    for (const watcher of fileEvents) watcher.dispose();
+    watchers = [];
     client = undefined;
     throw error;
   }

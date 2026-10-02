@@ -1,0 +1,303 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "formatter": {
+      "additionalProperties": false,
+      "properties": {
+        "printWidth": {
+          "default": 80,
+          "maximum": 1000,
+          "minimum": 20,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "lint": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "rules": {
+          "additionalProperties": false,
+          "properties": {
+            "correctness/environment/require-fallback": {
+              "default": "warn",
+              "description": "Handle an unset environment variable with a fallback or explicit failure.",
+              "oneOf": [
+                {
+                  "enum": [
+                    "off",
+                    "hint",
+                    "info",
+                    "warn",
+                    "error"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "severity": {
+                      "enum": [
+                        "off",
+                        "hint",
+                        "info",
+                        "warn",
+                        "error"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "severity"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
+            "correctness/variables/no-unused-let": {
+              "default": "warn",
+              "description": "Report local bindings that are never referenced.",
+              "oneOf": [
+                {
+                  "enum": [
+                    "off",
+                    "hint",
+                    "info",
+                    "warn",
+                    "error"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "severity": {
+                      "enum": [
+                        "off",
+                        "hint",
+                        "info",
+                        "warn",
+                        "error"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "severity"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
+            "style/arrays/prefer-any": {
+              "default": "warn",
+              "description": "Use any for an existence check, accounting for short-circuit behavior.",
+              "oneOf": [
+                {
+                  "enum": [
+                    "off",
+                    "hint",
+                    "info",
+                    "warn",
+                    "error"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "severity": {
+                      "enum": [
+                        "off",
+                        "hint",
+                        "info",
+                        "warn",
+                        "error"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "severity"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
+            "style/assignments/prefer-grouped": {
+              "default": "warn",
+              "description": "Group adjacent field assignments when their output state permits it.",
+              "oneOf": [
+                {
+                  "enum": [
+                    "off",
+                    "hint",
+                    "info",
+                    "warn",
+                    "error"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "minAssignments": {
+                      "default": 3,
+                      "minimum": 3,
+                      "type": "integer"
+                    },
+                    "severity": {
+                      "enum": [
+                        "off",
+                        "hint",
+                        "info",
+                        "warn",
+                        "error"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "severity"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
+            "style/objects/combine-without": {
+              "default": "warn",
+              "description": "Combine consecutive without calls.",
+              "oneOf": [
+                {
+                  "enum": [
+                    "off",
+                    "hint",
+                    "info",
+                    "warn",
+                    "error"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "severity": {
+                      "enum": [
+                        "off",
+                        "hint",
+                        "info",
+                        "warn",
+                        "error"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "severity"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
+            "style/objects/prefer-with": {
+              "default": "warn",
+              "description": "Use with for a projection of same-named fields, accounting for missing properties.",
+              "oneOf": [
+                {
+                  "enum": [
+                    "off",
+                    "hint",
+                    "info",
+                    "warn",
+                    "error"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "severity": {
+                      "enum": [
+                        "off",
+                        "hint",
+                        "info",
+                        "warn",
+                        "error"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "severity"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
+            "style/objects/prefer-without": {
+              "default": "warn",
+              "description": "Use without when copying an object and deleting fields.",
+              "oneOf": [
+                {
+                  "enum": [
+                    "off",
+                    "hint",
+                    "info",
+                    "warn",
+                    "error"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "severity": {
+                      "enum": [
+                        "off",
+                        "hint",
+                        "info",
+                        "warn",
+                        "error"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "severity"
+                  ],
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "preview": {
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "default": "yaml",
+          "enum": [
+            "yaml",
+            "json"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "title": "Bloblang workspace configuration",
+  "type": "object"
+}
