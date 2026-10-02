@@ -26,7 +26,7 @@ import {
   getServerChannel,
 } from './lib/channels';
 import { clientLogger } from './lib/logger';
-import { downloadLatestServer } from './lib/releases';
+import { downloadAsset } from './lib/releases';
 
 let client: LanguageClient | undefined;
 let watchers: ReturnType<typeof workspace.createFileSystemWatcher>[] = [];
@@ -79,7 +79,7 @@ async function serverCommand(context: ExtensionContext): Promise<string> {
     );
     return command;
   }
-  return downloadLatestServer(context.globalStorageUri.fsPath);
+  return downloadAsset({ context });
 }
 
 async function stopClient(): Promise<void> {

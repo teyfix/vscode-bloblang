@@ -154,10 +154,13 @@
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",
     "@types/bun": "latest",
+    "@types/unzipper": "^0.10.11",
     "@types/vscode": "^1.90.0",
     "@vscode/vsce": "^3.9.1",
     "esbuild": "^0.28.2",
+    "tar": "^7.5.22",
     "typescript": "^5",
+    "unzipper": "^0.12.5",
     "vscode-languageclient": "^9.0.1",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.3.2"

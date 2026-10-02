@@ -2,8 +2,9 @@
 
 Bloblang highlighting, diagnostics, formatting, completion, hover, definitions,
 and references, powered by [bloblang-lsp](https://github.com/teyfix/bloblang-lsp).
-The extension downloads the latest bloblang-lsp release on activation and caches
-the verified binary for offline use. It checks for a newer release on each start.
+The extension checks for the latest bloblang-lsp release on activation, downloads
+and extracts its platform archive, and saves the server for later starts. Cached
+release metadata and the extracted server also work offline.
 If another extension also provides Bloblang, disable one provider to avoid duplicate
 language servers. This extension includes its own grammars and needs no Benthos
 extension.
@@ -237,10 +238,10 @@ code --install-extension vscode-bloblang-0.2.1.vsix
 
 The universal package contains `dist/extension.js`, language grammars/configuration,
 and `schemas/bloblangrc.schema.json`; it contains no server binary. JavaScript
-dependencies are bundled. On activation, the extension downloads the latest
-server asset for the host platform from GitHub Releases and checks its SHA-256
-against the release's `SHA256SUMS`. A verified cached server works offline. Set
-`BLOBLANG_LSP_REPO` to use another checkout for schema generation.
+dependencies are bundled. On activation, the extension uses the latest matching
+archive from GitHub Releases, extracts its executable into VS Code global storage,
+and reuses it on later starts. Set `BLOBLANG_LSP_REPO` to use another checkout for
+schema generation.
 
 Development can use `bloblang.server.path` pointing to the sibling server binary.
 The configuration schema is generated from the server rule registry; run
