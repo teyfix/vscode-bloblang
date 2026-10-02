@@ -1,7 +1,7 @@
 {
   "name": "vscode-bloblang",
   "displayName": "Bloblang",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Bloblang language support for VS Code",
   "categories": [
     "Programming Languages",

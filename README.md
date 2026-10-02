@@ -196,7 +196,7 @@ the local grammar module through its Go module replacement:
 bun install --frozen-lockfile
 bun run check
 bun run package
-code --install-extension vscode-bloblang-linux-x64-0.1.0.vsix
+code --install-extension vscode-bloblang-linux-x64-0.2.0.vsix
 ```
 
 The package contains `dist/extension.js`, language grammars/configuration, and
