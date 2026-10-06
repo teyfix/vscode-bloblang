@@ -39,6 +39,11 @@ features continue to belong to the CUE extension.
   style; mappings that wrap onto multiple lines use literal blocks. Changed folded
   blocks are rewritten as literal blocks. Your default YAML formatter stays usable.
 - Use **Format Document** in Bloblang files.
+- With bloblang-lsp **v0.2.2+**, use **F2** (Rename Symbol) on `let` variables,
+  lambda parameters or named maps. Rename respects scope, follows literal
+  `.apply("name")` references through imports, and works in embedded YAML.
+  Field paths and computed map names are not renamed. See the server's
+  [rename guide](https://github.com/teyfix/bloblang-lsp/blob/main/docs/features/rename.md).
 
 `bloblang.server.path` overrides the downloaded binary with a path or PATH command.
 It supports `${workspaceFolder}` and `${userHome}`; relative paths are resolved
@@ -87,6 +92,8 @@ and width; short collections stay together when they fit. The formatter preserve
 comments and string contents, collapses short expressions, wraps longer ones,
 and keeps unary operators adjacent to their operands, such as `index(-1)`. Width
 guides expression layout; preserved strings and comments can exceed it.
+Long method chains break after dots. Lambda bodies wrap independently, keeping
+short calls such as `.join("; ")` together (bloblang-lsp v0.2.2+).
 
 ![Formatting a Bloblang object to fit the configured print width](docs/demos/formatting.gif)
 

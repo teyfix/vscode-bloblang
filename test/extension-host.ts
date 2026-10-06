@@ -121,6 +121,21 @@ export async function run(): Promise<void> {
     new vscode.Position(3, 16),
   );
   assert.ok(references?.length, 'Variable references');
+  const rename = await vscode.commands.executeCommand<vscode.WorkspaceEdit>(
+    'vscode.executeDocumentRenameProvider',
+    document.uri,
+    new vscode.Position(3, 16),
+    'name',
+  );
+  assert.equal(
+    rename?.get(document.uri).length,
+    2,
+    'F2 renames binding and reference',
+  );
+  assert.ok(rename, 'Rename provider is available');
+  assert.ok(await vscode.workspace.applyEdit(rename), 'Rename edits apply');
+  assert.ok(document.getText().includes('let name = this.name'));
+  assert.ok(document.getText().includes('root.person = $name'));
   const yamlFile = path.join(folder, 'pipeline.yaml');
   await writeFile(
     yamlFile,
@@ -153,6 +168,32 @@ export async function run(): Promise<void> {
   assert.ok(
     yaml.getText().includes('root.name = this.name.uppercase()'),
     'YAML embedded formatting applied',
+  );
+  const renameYamlFile = path.join(folder, 'rename.yaml');
+  await writeFile(
+    renameYamlFile,
+    'mapping: |\n  let movie = this\n  root = $movie\nlabel: preserved\n',
+  );
+  const renameYaml = await vscode.workspace.openTextDocument(renameYamlFile);
+  await vscode.window.showTextDocument(renameYaml);
+  const yamlRename = await until(
+    () =>
+      vscode.commands.executeCommand<vscode.WorkspaceEdit>(
+        'vscode.executeDocumentRenameProvider',
+        renameYaml.uri,
+        new vscode.Position(2, 12),
+        'film',
+      ),
+    (value) => value?.get(renameYaml.uri).length === 2,
+  );
+  assert.ok(
+    await vscode.workspace.applyEdit(yamlRename),
+    'Embedded rename edits apply',
+  );
+  assert.equal(
+    renameYaml.getText(),
+    'mapping: |\n  let film = this\n  root = $film\nlabel: preserved\n',
+    'Embedded rename preserves surrounding YAML',
   );
   const nextLineFile = path.join(folder, 'next-line.yaml');
   await writeFile(nextLineFile, "check:\n  '!errored()'\nlabel: unchanged\n");
@@ -197,7 +238,7 @@ export async function run(): Promise<void> {
   assert.ok(registered.includes('bloblang.formatEmbeddedMappings'));
   await vscode.commands.executeCommand('bloblang.restartServer');
   console.log(
-    'Bloblang extension smoke passed: downloaded server startup, registration, static/sample/declaration/deletion hover, completion, formatting, YAML mapping and next-line expressions, diagnostics, untitled, restart',
+    'Bloblang extension smoke passed: server startup, registration, static/sample/declaration/deletion hover, completion, formatting, rename, YAML mapping/rename and next-line expressions, diagnostics, untitled, restart',
   );
   await writeFile(path.join(folder, 'passed.txt'), 'passed\n');
 }
