@@ -226,6 +226,10 @@ without a sample, ordinary documentation and completion remain available.
 
 For large values, **Show Input** and **Show Output** lenses open the full formatted
 preview in a temporary YAML or JSON file using the originating document's settings.
+With bloblang-lsp v0.2.3+, hover and inlay tooltip bodies are capped at 4 KiB / 60
+lines. Large values show a **Preview truncated** notice at the top and point to
+these lenses. Collections, nesting and long strings are limited before formatting;
+mapping evaluation and the full preview still use the complete sample.
 **Open Sample** lenses open the selected sample files.
 
 ![Sampled hover previews for input and output values](docs/demos/sample-hover.gif)

@@ -195,6 +195,59 @@ export async function run(): Promise<void> {
     'mapping: |\n  let film = this\n  root = $film\nlabel: preserved\n',
     'Embedded rename preserves surrounding YAML',
   );
+  const largeFile = path.join(folder, 'large.blobl');
+  await writeFile(largeFile, 'root = this\n');
+  await writeFile(
+    path.join(folder, 'large.sample.json'),
+    JSON.stringify({
+      $bloblang: {
+        input: {
+          items: Array.from({ length: 500 }, (_, id) => ({
+            id,
+            description: 'sample text '.repeat(30),
+          })),
+          tail: 'END_OF_LARGE_SAMPLE',
+        },
+      },
+    }),
+  );
+  const large = await vscode.workspace.openTextDocument(largeFile);
+  await vscode.window.showTextDocument(large);
+  const largeHover = await until(
+    () =>
+      vscode.commands.executeCommand<vscode.Hover[]>(
+        'vscode.executeHoverProvider',
+        large.uri,
+        new vscode.Position(0, 8),
+      ),
+    (value) => hoverText(value).includes('Preview truncated'),
+  );
+  assert.ok(hoverText(largeHover).startsWith('**Preview truncated**'));
+  assert.ok(
+    hoverText(largeHover).length < 5000,
+    'Large hover payload is bounded',
+  );
+  const largeLenses = await until(
+    () =>
+      vscode.commands.executeCommand<vscode.CodeLens[]>(
+        'vscode.executeCodeLensProvider',
+        large.uri,
+      ),
+    (value) =>
+      value?.some((lens) => lens.command?.title.startsWith('Show Input')),
+  );
+  const fullInput = largeLenses.find((lens) =>
+    lens.command?.title.startsWith('Show Input'),
+  )?.command;
+  assert.ok(fullInput, 'Full preview command remains available');
+  await vscode.commands.executeCommand(
+    fullInput.command,
+    ...(fullInput.arguments ?? []),
+  );
+  await until(
+    async () => vscode.window.activeTextEditor?.document.getText() ?? '',
+    (value) => value.includes('END_OF_LARGE_SAMPLE'),
+  );
   const nextLineFile = path.join(folder, 'next-line.yaml');
   await writeFile(nextLineFile, "check:\n  '!errored()'\nlabel: unchanged\n");
   const nextLine = await vscode.workspace.openTextDocument(nextLineFile);
@@ -238,7 +291,7 @@ export async function run(): Promise<void> {
   assert.ok(registered.includes('bloblang.formatEmbeddedMappings'));
   await vscode.commands.executeCommand('bloblang.restartServer');
   console.log(
-    'Bloblang extension smoke passed: server startup, registration, static/sample/declaration/deletion hover, completion, formatting, rename, YAML mapping/rename and next-line expressions, diagnostics, untitled, restart',
+    'Bloblang extension smoke passed: server startup, registration, static/sample/declaration/deletion hover, bounded large hover and full preview, completion, formatting, rename, YAML mapping/rename and next-line expressions, diagnostics, untitled, restart',
   );
   await writeFile(path.join(folder, 'passed.txt'), 'passed\n');
 }
