@@ -16,9 +16,7 @@ const options = {
   platform: 'node' as const,
   format: 'cjs' as const,
   target: 'node20',
-  // unzipper's unused S3 reader has an optional AWS dependency. ZIP extraction
-  // uses its local stream path and never loads that module.
-  external: ['vscode', '@aws-sdk/client-s3'],
+  external: ['vscode'],
   minify: process.argv.includes('--minify'),
   logLevel: 'info' as const,
 };

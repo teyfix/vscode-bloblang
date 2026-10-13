@@ -2,9 +2,9 @@
 
 Bloblang highlighting, diagnostics, formatting, completion, hover, definitions,
 and references, powered by [bloblang-lsp](https://github.com/teyfix/bloblang-lsp).
-The extension checks for the latest bloblang-lsp release on activation, downloads
-and extracts its platform archive, and saves the server for later starts. Cached
-release metadata and the extracted server also work offline.
+The extension manages the `blobl` tool for editor features and terminal linting
+and formatting. An installed tool starts without waiting for the network and
+works offline; stable releases are checked in the background.
 If another extension also provides Bloblang, disable one provider to avoid duplicate
 language servers. This extension includes its own grammars and needs no Benthos
 extension.
@@ -30,10 +30,65 @@ With a CUE extension providing the host grammar, CUE mapping strings (ordinary,
 raw and multiline) and interpolation receive highlighting. CUE language server
 features continue to belong to the CUE extension.
 
+## Managed tool and terminal CLI
+
+With the default settings, activation prepares `blobl` and makes it available in
+new VS Code integrated terminals. The language server starts when you open a
+Bloblang document or a YAML document with `bloblang.yaml.enabled` enabled.
+Set `bloblang.cli.enabled` to `false` to disable the integrated terminal PATH
+contribution. Existing terminals may need to be relaunched after installation or
+an update.
+
+```sh
+blobl --version
+blobl lint mappings/
+blobl lint --fix mappings/
+blobl lint --format json config.yaml
+blobl fmt --write mappings/
+blobl fmt --check '**/*.blobl'
+```
+
+Quote glob patterns so `blobl` expands them; `**` matches recursively. Linting is
+static and does not execute mappings or load sample files. `--fix` applies only
+available safe fixes. `fmt --check` returns `1` for formatting changes; lint
+returns `1` for warnings or errors, and usage/configuration failures return `2`.
+See the [CLI reference](https://github.com/teyfix/bloblang-lsp/blob/main/docs/cli.md)
+for stdin, YAML handling and all options.
+
+The tool runs on the **VS Code extension host**. In Remote SSH, WSL or a dev
+container, that is the remote machine, WSL distribution or container. Downloads
+match that host's OS and CPU: Linux, macOS and Windows, each with amd64 (x64) and
+arm64 builds. Remote installation and terminal PATH changes apply to that host.
+
+On first installation, the extension reads the public `blobl-release.json`
+manifest from GitHub Releases, downloads the raw binary from its version-tagged
+release, and checks that `blobl --version` matches the manifest before using it.
+No GitHub token is needed. Later activations reuse the verified cached tool and
+check for stable updates in the background at most about once a day. A failed
+download or version check keeps the installed tool usable. Background installs
+take effect on the next server start; **Bloblang: Check for Tool Updates** checks
+immediately and restarts an active managed language server after an update.
+Use `blobl --version` in a new integrated terminal to check the selected CLI.
+
+A cached legacy `language-server` from an earlier extension can still provide
+editor features offline, but it does not provide the `blobl` terminal commands.
+
+For shells outside VS Code, run **Bloblang: Install CLI for External Terminals**.
+Choose an absolute folder on the extension host; the defaults are `~/.local/bin`
+on Linux/macOS and `%LOCALAPPDATA%\Bloblang\bin` on Windows. The command copies
+the managed binary and asks before replacing a different existing file. Add that
+folder to your shell's PATH if needed, then open a new terminal and run
+`blobl --version`. The command reports the installed path and PATH instructions;
+it does not edit shell profiles or the Windows registry. This copy remains after
+extension removal and is updated only when you run the install command again.
+
 ## Commands and settings
 
 - **Bloblang: Restart Language Server** restarts using the current settings.
 - **Bloblang: Show Language Server Logs** opens server output.
+- **Bloblang: Check for Tool Updates** installs the latest stable managed tool.
+- **Bloblang: Install CLI for External Terminals** copies the managed CLI to a
+  folder you choose.
 - **Bloblang: Format Embedded Mappings** formats Bloblang in the active YAML file
   while preserving the surrounding YAML. Short scalar values keep their quoting
   style; mappings that wrap onto multiple lines use literal blocks. Changed folded
@@ -45,9 +100,12 @@ features continue to belong to the CUE extension.
   Field paths and computed map names are not renamed. See the server's
   [rename guide](https://github.com/teyfix/bloblang-lsp/blob/main/docs/features/rename.md).
 
-`bloblang.server.path` overrides the downloaded binary with a path or PATH command.
+`bloblang.server.path` overrides the managed server with a path or PATH command.
 It supports `${workspaceFolder}` and `${userHome}`; relative paths are resolved
-from the first workspace folder. `bloblang.server.args` supplies server arguments.
+from the first workspace folder. `bloblang.server.args` supplies arguments exactly
+as configured for a custom server. For a custom `blobl`, set the arguments to
+`["lsp"]`; the managed tool selects `lsp` automatically. A custom server path
+disables automatic managed tool preparation and integrated terminal CLI exposure.
 `bloblang.yaml.enabled` controls YAML server features (highlighting is always
 available). `bloblang.trace.server` enables protocol logging. Lifecycle messages
 stay in the output channels. A quiet status bar indicator shows starting, ready,
@@ -56,12 +114,15 @@ Startup failures offer logs and settings.
 
 ## Workspace configuration and linting
 
-Create `.bloblangrc.json` in the document's workspace. VS Code automatically
-provides configuration completion and validation through the bundled schema.
-Each document uses its containing workspace root; nested workspace roots use the
-closest match. Without a workspace, configuration is read from the document's
-parent directory. Changes apply without restarting the server. Defaults are 80
-columns and YAML previews. All lint rules are enabled:
+Create `.bloblangrc.json` in your project. VS Code automatically provides
+configuration completion and validation through the bundled schema. Each document
+uses the nearest configuration from its directory up to the deepest containing
+workspace root, inclusive. Embedded mappings use the YAML file's location.
+A nested configuration replaces ancestor settings; configurations are not merged.
+Loose documents and CLI inputs use the nearest Git project boundary, or search
+up to the filesystem root outside Git. Configuration edits, creation and deletion
+apply without restarting the server. Defaults are 80 columns and YAML previews.
+All lint rules are enabled:
 `prefer-with` and `prefer-any` start as hints; the others start as warnings:
 
 ```json
@@ -85,6 +146,24 @@ columns and YAML previews. All lint rules are enabled:
   }
 }
 ```
+
+CLI directory and glob scans honor `.gitignore` and `.bloblangignore`, including
+nested ignore files. Add Gitignore-style patterns in `files.exclude`, relative to
+the configuration file's directory:
+
+```json
+{
+  "files": {
+    "exclude": ["generated/**"],
+    "respectGitignore": true
+  }
+}
+```
+
+Set `files.respectGitignore` to `false` to skip `.gitignore` while retaining the
+other exclusions. `--no-ignore` bypasses ignore rules for a CLI run; explicitly
+named files also bypass them. These settings control CLI file selection and do
+not suppress diagnostics in open editor documents.
 
 `printWidth` accepts integers from 20 to 1000. Set `preview.format` to `json`
 for JSON previews. Hovers, inlay tooltips, and output previews use the same format
@@ -136,7 +215,7 @@ The other rules provide suggestions to review. `.with()` omits missing fields,
 where object construction retains `null`; `.assign()` merges nested objects,
 where direct field assignments replace them; `.any()` short-circuits, which can
 change predicate errors or side effects. Formatting does not apply lint refactors.
-See the server's [lint guide](https://github.com/teyfix/bloblang-lsp/blob/7b72549726b37a784405b72aabcb93f4ab7455c4/docs/features/lint.md)
+See the server's [lint guide](https://github.com/teyfix/bloblang-lsp/blob/main/docs/features/lint.md)
 for the rule conditions and examples.
 
 ![A Bloblang lint diagnostic and its explicit Quick Fix](docs/demos/lint-quick-fix.gif)
@@ -244,17 +323,17 @@ building the extension:
 bun install --frozen-lockfile
 bun run check
 bun run package
-code --install-extension vscode-bloblang-0.2.1.vsix
+code --install-extension vscode-bloblang-0.3.0.vsix
 ```
 
 The universal package contains `dist/extension.js`, language grammars/configuration,
 and `schemas/bloblangrc.schema.json`; it contains no server binary. JavaScript
-dependencies are bundled. On activation, the extension uses the latest matching
-archive from GitHub Releases, extracts its executable into VS Code global storage,
-and reuses it on later starts. Set `BLOBLANG_LSP_REPO` to use another checkout for
-schema generation.
+dependencies are bundled. The extension downloads a matching raw `blobl` binary
+into VS Code global storage on the extension host and reuses it on later starts.
+Set `BLOBLANG_LSP_REPO` to use another checkout for schema generation.
 
-Development can use `bloblang.server.path` pointing to the sibling server binary.
+Development can use `bloblang.server.path` pointing to a sibling server binary.
+For `blobl`, also set `bloblang.server.args` to `["lsp"]`.
 The configuration schema is generated from the server rule registry; run
 `bun run schema` after changing rules or options. Packaging regenerates it before
 building. Run `bun run build:watch`, then launch an Extension Development Host.

@@ -1,7 +1,7 @@
 {
   "name": "vscode-bloblang",
   "displayName": "Bloblang",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Bloblang language support for VS Code",
   "categories": [
     "Programming Languages",
@@ -48,6 +48,14 @@
         "command": "bloblang.formatEmbeddedMappings",
         "title": "Bloblang: Format Embedded Mappings",
         "enablement": "editorLangId == yaml"
+      },
+      {
+        "command": "bloblang.checkToolUpdates",
+        "title": "Bloblang: Check for Tool Updates"
+      },
+      {
+        "command": "bloblang.installCli",
+        "title": "Bloblang: Install CLI for External Terminals"
       }
     ],
     "languages": [
@@ -103,7 +111,7 @@
           "type": "string",
           "default": "",
           "scope": "machine-overridable",
-          "description": "Path or PATH command for bloblang-lsp. Empty downloads the latest release and reuses a cached copy offline. Supports ${workspaceFolder} and ${userHome}."
+          "description": "Path or PATH command for a custom language server. Empty manages blobl and launches blobl lsp, with cached legacy server support offline. Supports ${workspaceFolder} and ${userHome}. A custom path disables automatic managed CLI installation."
         },
         "bloblang.server.args": {
           "type": "array",
@@ -111,7 +119,7 @@
             "type": "string"
           },
           "default": [],
-          "description": "Arguments passed to bloblang-lsp."
+          "description": "Arguments passed to a custom server.path command. For a custom blobl binary, set [\"lsp\"]. Managed tool arguments are selected automatically."
         },
         "bloblang.yaml.enabled": {
           "type": "boolean",
@@ -127,6 +135,11 @@
           ],
           "default": "off",
           "description": "Trace communication with the Bloblang language server."
+        },
+        "bloblang.cli.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Make the managed blobl CLI available in new integrated terminals on the extension host. Requires an empty server.path. External terminal installation is a separate explicit command."
         }
       }
     },
@@ -148,19 +161,17 @@
   },
   "activationEvents": [
     "onLanguage:bloblang",
-    "onLanguage:yaml"
+    "onLanguage:yaml",
+    "onStartupFinished"
   ],
   "dependencies": {},
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",
     "@types/bun": "latest",
-    "@types/unzipper": "^0.10.11",
     "@types/vscode": "^1.90.0",
     "@vscode/vsce": "^3.9.1",
     "esbuild": "^0.28.2",
-    "tar": "^7.5.22",
     "typescript": "^5",
-    "unzipper": "^0.12.5",
     "vscode-languageclient": "^9.0.1",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.3.2"
@@ -168,5 +179,8 @@
   "engines": {
     "vscode": "^1.90.0"
   },
-  "icon": "icon.png"
+  "icon": "icon.png",
+  "extensionKind": [
+    "workspace"
+  ]
 }
