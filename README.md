@@ -1,7 +1,7 @@
 # Bloblang for VS Code
 
 Bloblang highlighting, diagnostics, formatting, completion, hover, definitions,
-and references, powered by [bloblang-lsp](https://github.com/teyfix/bloblang-lsp).
+and references, powered by [Bloblang developer tools](https://github.com/teyfix/bloblang).
 The extension manages the `blobl` tool for editor features and terminal linting
 and formatting. An installed tool starts without waiting for the network and
 works offline; stable releases are checked in the background.
@@ -52,7 +52,7 @@ Quote glob patterns so `blobl` expands them; `**` matches recursively. Linting i
 static and does not execute mappings or load sample files. `--fix` applies only
 available safe fixes. `fmt --check` returns `1` for formatting changes; lint
 returns `1` for warnings or errors, and usage/configuration failures return `2`.
-See the [CLI reference](https://github.com/teyfix/bloblang-lsp/blob/main/docs/cli.md)
+See the [CLI reference](https://github.com/teyfix/bloblang/blob/main/docs/cli.md)
 for stdin, YAML handling and all options.
 
 The tool runs on the **VS Code extension host**. In Remote SSH, WSL or a dev
@@ -94,11 +94,11 @@ extension removal and is updated only when you run the install command again.
   style; mappings that wrap onto multiple lines use literal blocks. Changed folded
   blocks are rewritten as literal blocks. Your default YAML formatter stays usable.
 - Use **Format Document** in Bloblang files.
-- With bloblang-lsp **v0.2.2+**, use **F2** (Rename Symbol) on `let` variables,
+- With Bloblang **v0.2.2+**, use **F2** (Rename Symbol) on `let` variables,
   lambda parameters or named maps. Rename respects scope, follows literal
   `.apply("name")` references through imports, and works in embedded YAML.
   Field paths and computed map names are not renamed. See the server's
-  [rename guide](https://github.com/teyfix/bloblang-lsp/blob/main/docs/features/rename.md).
+  [rename guide](https://github.com/teyfix/bloblang/blob/main/docs/features/rename.md).
 
 `bloblang.server.path` overrides the managed server with a path or PATH command.
 It supports `${workspaceFolder}` and `${userHome}`; relative paths are resolved
@@ -172,7 +172,7 @@ comments and string contents, collapses short expressions, wraps longer ones,
 and keeps unary operators adjacent to their operands, such as `index(-1)`. Width
 guides expression layout; preserved strings and comments can exceed it.
 Long method chains break after dots. Lambda bodies wrap independently, keeping
-short calls such as `.join("; ")` together (bloblang-lsp v0.2.2+).
+short calls such as `.join("; ")` together (Bloblang v0.2.2+).
 
 ![Formatting a Bloblang object to fit the configured print width](docs/demos/formatting.gif)
 
@@ -215,7 +215,7 @@ The other rules provide suggestions to review. `.with()` omits missing fields,
 where object construction retains `null`; `.assign()` merges nested objects,
 where direct field assignments replace them; `.any()` short-circuits, which can
 change predicate errors or side effects. Formatting does not apply lint refactors.
-See the server's [lint guide](https://github.com/teyfix/bloblang-lsp/blob/main/docs/features/lint.md)
+See the server's [lint guide](https://github.com/teyfix/bloblang/blob/main/docs/features/lint.md)
 for the rule conditions and examples.
 
 ![A Bloblang lint diagnostic and its explicit Quick Fix](docs/demos/lint-quick-fix.gif)
@@ -305,7 +305,7 @@ without a sample, ordinary documentation and completion remain available.
 
 For large values, **Show Input** and **Show Output** lenses open the full formatted
 preview in a temporary YAML or JSON file using the originating document's settings.
-With bloblang-lsp v0.2.3+, hover and inlay tooltip bodies are capped at 4 KiB / 60
+With Bloblang v0.2.3+, hover and inlay tooltip bodies are capped at 4 KiB / 60
 lines. Large values show a **Preview truncated** notice at the top and point to
 these lenses. Collections, nesting and long strings are limited before formatting;
 mapping evaluation and the full preview still use the complete sample.
@@ -316,21 +316,23 @@ mapping evaluation and the full preview still use the complete sample.
 ## Build and package
 
 Install [Bun](https://bun.sh), Go matching the sibling server's `go.mod`, and a C
-compiler for schema generation. Keep `bloblang-lsp` beside this repo while
+compiler for schema generation. Keep `bloblang` beside this repo while
 building the extension:
 
 ```sh
 bun install --frozen-lockfile
 bun run check
 bun run package
-code --install-extension vscode-bloblang-0.3.0.vsix
+code --install-extension vscode-bloblang-0.3.1.vsix
 ```
 
 The universal package contains `dist/extension.js`, language grammars/configuration,
 and `schemas/bloblangrc.schema.json`; it contains no server binary. JavaScript
 dependencies are bundled. The extension downloads a matching raw `blobl` binary
 into VS Code global storage on the extension host and reuses it on later starts.
-Set `BLOBLANG_LSP_REPO` to use another checkout for schema generation.
+Set `BLOBLANG_REPO` to use another checkout for schema generation. The previous
+`BLOBLANG_LSP_REPO` variable and `../bloblang-lsp` directory remain supported
+while existing local checkouts migrate.
 
 Development can use `bloblang.server.path` pointing to a sibling server binary.
 For `blobl`, also set `bloblang.server.args` to `["lsp"]`.

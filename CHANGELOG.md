@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.1
+
+- Download managed tools directly from `teyfix/bloblang`, the renamed developer
+  tools repository, without relying on GitHub redirects.
+- Update documentation links and support the new sibling checkout name and
+  `BLOBLANG_REPO` for configuration schema generation.
+
 ## 0.3.0
 
 - Manage the shared `blobl` tool for the language server, static linting and

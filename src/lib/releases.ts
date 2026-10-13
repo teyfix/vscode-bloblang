@@ -53,7 +53,7 @@ export interface ToolManagerDependencies {
 type StorageContext = Partial<
   Pick<ExtensionContext, 'globalStorageUri' | 'globalStoragePath'>
 >;
-const RELEASE_ROOT = 'https://github.com/teyfix/bloblang-lsp/releases';
+const RELEASE_ROOT = 'https://github.com/teyfix/bloblang/releases';
 export const RELEASE_MANIFEST_URL = `${RELEASE_ROOT}/latest/download/blobl-release.json`;
 const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000;
 const STABLE_VERSION = /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;

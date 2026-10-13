@@ -1,10 +1,13 @@
+import { existsSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 // The server's rule registry owns IDs, options and defaults. Never hand-edit
 // the copied schema: regenerate it whenever server configuration changes.
 const repository = path.resolve(
-  process.env.BLOBLANG_LSP_REPO ?? '../bloblang-lsp',
+  process.env.BLOBLANG_REPO ??
+    process.env.BLOBLANG_LSP_REPO ??
+    (existsSync('../bloblang/go.mod') ? '../bloblang' : '../bloblang-lsp'),
 );
 const generated = Bun.spawn(['go', 'run', './cmd/config-schema'], {
   cwd: repository,

@@ -105,8 +105,8 @@ for (const platform of ['linux', 'darwin', 'win32']) {
       const tool = await f.create().resolve();
       const target = `${platform === 'win32' ? 'windows' : platform}-${arch === 'x64' ? 'amd64' : arch}`;
       expect(f.requests).toEqual([
-        RELEASE_MANIFEST_URL,
-        `https://github.com/teyfix/bloblang-lsp/releases/download/v1.2.3/${assets[target]}`,
+        'https://github.com/teyfix/bloblang/releases/latest/download/blobl-release.json',
+        `https://github.com/teyfix/bloblang/releases/download/v1.2.3/${assets[target]}`,
       ]);
       expect(tool).toEqual({
         command: path.join(
