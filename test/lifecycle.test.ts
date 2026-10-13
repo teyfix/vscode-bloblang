@@ -560,7 +560,7 @@ test('owned child is killed when initialization is canceled, including a child i
       command: process.execPath,
       args: [
         '-e',
-        'process.on("SIGTERM", () => {}); process.stdin.resume(); process.stdout.write("ready\\n"); setInterval(() => {}, 1000);',
+        'process.on("SIGTERM", () => {}); const {createMessageConnection,StreamMessageReader,StreamMessageWriter}=require("vscode-jsonrpc/node"); const connection=createMessageConnection(new StreamMessageReader(process.stdin),new StreamMessageWriter(process.stdout)); connection.onRequest("initialize",()=>{connection.sendNotification("fixture/initializeReceived"); return new Promise(()=>{});}); connection.listen();',
       ],
       version: 'fixture',
     },
@@ -568,16 +568,22 @@ test('owned child is killed when initialization is canceled, including a child i
   );
   const child = await owned.start();
   if (!child.stdout || !child.stdin) throw new Error('Missing stdio');
-  await new Promise((resolve) => child.stdout?.once('data', resolve));
   const connection = createMessageConnection(
     new StreamMessageReader(child.stdout),
     new StreamMessageWriter(child.stdin),
+  );
+  const received = deferred<void>();
+  connection.onNotification('fixture/initializeReceived', () =>
+    received.resolve(),
   );
   connection.listen();
   const initializing = connection
     .sendRequest('initialize', { capabilities: {} })
     .then(() => {});
   const startup = waitForStartup(initializing, controller);
+  // Cancel only after the child has consumed the entire initialize request.
+  // Otherwise Bun's Windows pipe writer can still be flushing when it is killed.
+  await received.promise;
   controller.abort();
   await expect(startup).rejects.toThrow();
   await owned.terminate();
