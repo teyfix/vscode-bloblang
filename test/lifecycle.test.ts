@@ -720,7 +720,7 @@ test('external CLI helper rejects unsafe targets and cancellation without modify
         signal: aborted.signal,
       }),
     ).rejects.toThrow();
-    expect(await readdir(root)).toEqual([
+    expect((await readdir(root)).sort()).toEqual([
       process.platform === 'win32' ? 'blobl.exe' : 'blobl',
       'source',
     ]);
