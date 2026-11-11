@@ -9,7 +9,7 @@ If another extension also provides Bloblang, disable one provider to avoid dupli
 language servers. This extension includes its own grammars and needs no Benthos
 extension.
 
-![Typing a Bloblang mapping with live syntax highlighting and completion](docs/demos/typing.gif)
+![Typing a Bloblang mapping with live syntax highlighting and completion](docs/demos/typing.webp)
 
 Open a `.blobl` or `.bloblang` file. Bloblang is also highlighted inside YAML
 `mapping`, `request_map`, `result_map`, `args_mapping`, `fields_mapping`, `check`,
@@ -24,7 +24,7 @@ values also receive formatting; interpolation expressions are not formatted.
 External `mapping: from "mapping.blobl"` values support file navigation and missing
 file diagnostics.
 
-![Bloblang highlighted inside quoted YAML mapping and check values](docs/demos/yaml-highlighting.gif)
+![Bloblang highlighted inside quoted YAML mapping and check values](docs/demos/yaml-highlighting.webp)
 
 With a CUE extension providing the host grammar, CUE mapping strings (ordinary,
 raw and multiline) and interpolation receive highlighting. CUE language server
@@ -174,7 +174,7 @@ guides expression layout; preserved strings and comments can exceed it.
 Long method chains break after dots. Lambda bodies wrap independently, keeping
 short calls such as `.join("; ")` together (Bloblang v0.2.2+).
 
-![Formatting a Bloblang object to fit the configured print width](docs/demos/formatting.gif)
+![Formatting a Bloblang object to fit the configured print width](docs/demos/formatting.webp)
 
 Rule keys remain flat for autocomplete; their slash-separated IDs group related
 rules. Each accepts `off`, `hint`, `info`, `warn`, or `error`, or an object with
@@ -218,7 +218,7 @@ change predicate errors or side effects. Formatting does not apply lint refactor
 See the server's [lint guide](https://github.com/teyfix/bloblang/blob/main/docs/features/lint.md)
 for the rule conditions and examples.
 
-![A Bloblang lint diagnostic and its explicit Quick Fix](docs/demos/lint-quick-fix.gif)
+![A Bloblang lint diagnostic and its explicit Quick Fix](docs/demos/lint-quick-fix.webp)
 
 ## Sample input and metadata
 
@@ -311,7 +311,7 @@ these lenses. Collections, nesting and long strings are limited before formattin
 mapping evaluation and the full preview still use the complete sample.
 **Open Sample** lenses open the selected sample files.
 
-![Sampled hover previews for input and output values](docs/demos/sample-hover.gif)
+![Sampled hover previews for input and output values](docs/demos/sample-hover.webp)
 
 ## Build and package
 
